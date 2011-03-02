@@ -1,0 +1,701 @@
+digraph ta_soeur_en_claquettes
+{
+    fontname = "Bitstream sans Vera"
+    compound = true;
+    ranksep = 1.25;
+    rankdir = BT;
+    label = "Generic Multiplayer Gaming P";
+    fontsize = 24;
+
+    node
+    [
+        fontname = "Monaco"
+        fontsize = 8
+        shape = "record"
+        style = filled
+        fillcolor = white
+    ]
+
+    edge
+    [
+        fontname = "Monaco"
+        fontsize = 8
+    ]
+
+
+/* Common */
+    subgraph cluster_Common
+    {
+        label = "Common"
+        fontsize = 24;
+
+        cm_Packet
+        [
+    label="{\
+Packet\
+|\
+- _data: char*\l\
+- _size: size_t\l\
+- _allocSize: size_t\l\
+- _offset: mutable size_t\l\
+|\
++ Packet()\l\
++ Packet(packet: Packet const&)\l\
++ ~Packet()\l\
+- _WriteSize(): void\l\
+- _WriteByte(byte: char): void\l\
+- _Resize(target: size_t): void\l\
++ operator =(packet: Packet const&): Packet&\l\
++ BytesLeft() const: size_t\l\
++ Clear(): void\l\
++ WriteData(data: char*, size: size_t): void\l\
++ Write8(val: uint8_t): void\l\
++ Write16(val: uint16_t): void\l\
++ Write32(val: uint32_t): void\l\
++ WriteFloat(val: float): void\l\
++ WriteString(val: String const&): void\l\
++ Read8() const: uint8_t\l\
++ Read16() const: uint16_t\l\
++ Read32() const: uint32_t\l\
++ ReadFloat() const: float\l\
++ ReadString() const: String\l\
++ GetSize() const: size_t\l\
++ GetCompleteSize() const: size_t\l\
++ GetData() const: char const*\l\
++ GetCompleteData() const: char const*\l\
++ Dump() const: void\l\
+}"
+        ]
+
+        cm_String
+        [
+    label="{\
+String\
+|\
+- \<\<static\>\> _whitespaces: std::string const\l\
+|\
++ String()\l\
++ String(str: std::string const&)\l\
++ String(str: char const*)\l\
++ String(s: String const&)\l\
++ String(val: T const&): template\<typename T\>\l\
++ operator \>\>(val: T&): template\<typename T\> String&\l\
++ operator +(val: T const&) const: template\<typename T\> String\l\
++ operator +=(val: T const&): template\<typename T\> String&\l\
++ ltrim(whitespaces: std::string const&): void\l\
+}"
+        ]
+
+        cm_Log
+        [
+    label="{\
+Log\
+|\
+|\
++ \<\<static\>\> D(message: String const&): void\l\
++ \<\<static\>\> I(message: String const&): void\l\
++ \<\<static\>\> W(message: String const&): void\l\
++ \<\<static\>\> E(message: String const&): void\l\
+}"
+        ]
+
+        cm_Singleton
+        [
+            label = "Singleton"
+        ]
+
+    }
+
+/* Server */
+    subgraph cluster_Server
+    {
+        label = "Server"
+        fontsize = 24;
+
+subgraph cluster_Server2
+{
+/* Network */
+        subgraph cluster_Network
+        {
+            label = "Network"
+            fontsize = 16
+
+            sv_HostAddress
+            [
+    label="{\
+HostAddress\
+|\
+- _ip: uint32_t\l\
+- _port: uint16_t\l\
+|\
++ HostAddress()\l\
++ HostAddress(port: uint16_t, ip: uint32_t)\l\
++ HostAddress(tcpSocket: ITcpSocket const&, port: uint16_t)\l\
++ SetIp(ip: uint32_t): void\l\
++ SetPort(port: uint16_t): void\l\
++ GetIp() const: uint32_t\l\
++ GetPort() const: uint16_t\l\
++ \<\<static\>\> GetUdpPort(udpSocket: IUdpSocket const&): uint16_t\l\
++ Dump() const: void\l\
++ operator ==(other: HostAddress const&) const: bool\l\
++ operator \<(other: HostAddress const&) const: bool\l\
++ operator \>(other: HostAddress const&) const: bool\l\
+}"
+            ]
+
+            sv_IService
+            [
+    label="{\
+IService\
+|\
+|\
++ \<\<virtual\>\> ~IService()\l\
++ \<\<abstract\>\> RegisterAcceptor(socket: ITcpSocket&, handler: AcceptHandler const&): void\l\
++ \<\<abstract\>\> RegisterTcpSocket(socket: ITcpSocket&, handler: DataHandler const&): TcpSocketProxy&\l\
++ \<\<abstract\>\> RegisterUdpSocket(socket: IUdpSocket&, handler: DataHandler const&): IUdpSocketProxy&\l\
++ \<\<abstract\>\> RegisterTimer(milliseconds: uint32_t, handler: TimerHandler const&): uint32_t\l\
++ \<\<abstract\>\> UnregisterAcceptor(socket: ITcpSocket const&): void\l\
++ \<\<abstract\>\> UnregisterTcpSocket(socket: ITcpSocket const&): void\l\
++ \<\<abstract\>\> UnregisterUdpSocket(socket: IUdpSocket const&): void\l\
++ \<\<abstract\>\> UnregisterTimer(timerId: uint32_t): void\l\
++ \<\<abstract\>\> Stop(): void\l\
++ \<\<abstract\>\> Run(): void\l\
+}"
+                ]
+
+                sv_Service
+                [
+    label="{\
+Service\
+|\
+- _acceptors: std::map\<ITcpSocket*, AcceptHandler\>\l\
+- _tcpSockets: std::map\<TcpSocketProxy*, DataHandler\>\l\
+- _udpSockets: std::map\<IUdpSocketProxy*, DataHandler\>\l\
+- _timers: std::map\<uint32_t, Timer\>\l\
+- _nextTimerId: uint32_t\l\
+- _running: bool\l\
+- _readFdset: fd_set\l\
+- _writeFdset: fd_set\l\
+- _maxFd: SocketFD\l\
+- _timeOut: struct timeval\l\
+- _removedAcceptors: std::list\<ITcpSocket*\>\l\
+- _removedTcpSockets: std::list\<ITcpSocket*\>\l\
+- _removedUdpSockets: std::list\<IUdpSocket*\>\l\
+- _removedTimers: std::list\<uint32_t\>\l\
+- _rdBuff: char*\l\
+|\
++ Service()\l\
++ ~Service()\l\
+- _InitFdsets(): void\l\
+- _InitTimeOut(): void\l\
+- _Select(): void\l\
+- _ExecSockets(): void\l\
+- _ExecAcceptor(acceptor: std::map\<ITcpSocket*, AcceptHandler\>::iterator&): void\l\
+- _ExecTcpSocket(socket: std::map\<TcpSocketProxy*, DataHandler\>::iterator&): void\l\
+- _ExecUdpSocket(socket: std::map\<IUdpSocketProxy*, DataHandler\>::iterator&): void\l\
+- _ExecTimers(): void\l\
+- _CleanMaps(): void\l\
++ \<\<virtual\>\> RegisterAcceptor(socket: ITcpSocket&, handler: AcceptHandler const&): void\l\
++ \<\<virtual\>\> RegisterTcpSocket(socket: ITcpSocket&, handler: DataHandler const&): TcpSocketProxy&\l\
++ \<\<virtual\>\> RegisterUdpSocket(socket: IUdpSocket&, handler: DataHandler const&): IUdpSocketProxy&\l\
++ \<\<virtual\>\> RegisterTimer(milliseconds: uint32_t, handler: TimerHandler const&): uint32_t\l\
++ \<\<virtual\>\> UnregisterAcceptor(socket: ITcpSocket const&): void\l\
++ \<\<virtual\>\> UnregisterTcpSocket(socket: ITcpSocket const&): void\l\
++ \<\<virtual\>\> UnregisterUdpSocket(socket: IUdpSocket const&): void\l\
++ \<\<virtual\>\> UnregisterTimer(timerId: uint32_t): void\l\
++ \<\<virtual\>\> Stop(): void\l\
++ \<\<virtual\>\> Run(): void\l\
+}"
+                ]
+
+                sv_ITcpSocket
+                [
+    label="{\
+ITcpSocket\
+|\
+|\
++ \<\<virtual\>\> ~ITcpSocket()\l\
++ \<\<abstract\>\> Send(data: char const*, len: size_t): ssize_t\l\
++ \<\<abstract\>\> Recv(buf: char*, len: size_t): ssize_t\l\
++ \<\<abstract\>\> Accept(): ITcpSocket*\l\
++ \<\<abstract\>\> GetSocketFD() const: SocketFD\l\
+}"
+                ]
+
+                sv_IUdpSocket
+                [
+    label="{\
+IUdpSocket\
+|\
+|\
++ \<\<virtual\>\> ~IUdpSocket()\l\
++ \<\<abstract\>\> WriteDatagram(address: HostAddress const&, data: char const*, len: size_t): ssize_t\l\
++ \<\<abstract\>\> ReadDatagram(buf: char*, len: size_t): ssize_t\l\
++ \<\<abstract\>\> GetSocketFD() const: SocketFD\l\
+}"
+                ]
+
+                sv_TcpSocketProxy
+                [
+    label="{\
+TcpSocketProxy\
+|\
+- _socket: ITcpSocket&\l\
+- _buff: std::list\<SendBuffer\>\l\
+- _writeHandler: WriteHandler\l\
+- _writeHandling: bool\l\
+|\
++ TcpSocketProxy(socket: ITcpSocket&)\l\
++ ~TcpSocketProxy()\l\
++ Send(packet: Packet const&): void\l\
++ HasSomethingToSend() const: bool\l\
++ SendOnNetwork(): ssize_t\l\
++ GetSocket(): ITcpSocket&\l\
++ ActivateWriteHandling(handler: WriteHandler const&): void\l\
++ DeactivateWriteHandling(): void\l\
+}"
+                ]
+
+                sv_IUdpSocketProxy
+                [
+    label="{\
+IUdpSocketProxy\
+|\
+|\
++ \<\<virtual\>\> ~IUdpSocketProxy()\l\
++ \<\<abstract\>\> Send(address: HostAddress const&, packet: Packet const&): void\l\
++ \<\<abstract\>\> HasSomethingToSend() const: bool\l\
++ \<\<abstract\>\> SendOnNetwork(): void\l\
++ \<\<abstract\>\> GetSocket(): IUdpSocket&\l\
+}"
+                ]
+
+                sv_UdpSocketProxy
+                [
+    label="{\
+UdpSocketProxy\
+|\
+- _socket: IUdpSocket&\l\
+- _buff: std::map\<HostAddress, std::queue\<SendBuffer\>\>\l\
+|\
++ UdpSocketProxy(socket: IUdpSocket&)\l\
++ \<\<virtual\>\> Send(address: HostAddress const&, packet: Packet const&): void\l\
++ \<\<virtual\>\> HasSomethingToSend() const: bool\l\
++ \<\<virtual\>\> SendOnNetwork(): void\l\
++ \<\<virtual\>\> GetSocket(): IUdpSocket&\l\
+}"
+                ]
+
+                {rank=same ; sv_UdpSocketProxy ; sv_TcpSocketProxy}
+
+                subgraph cluster_TcpSocket
+                {
+                    label = "typedef TcpSocket"
+                    fontsize = 16
+
+                    sv_UnixTcpSocket
+                    [
+    label="{\
+UnixTcpSocket\
+|\
+- _socket: SocketFD\l\
+- _acceptor: bool\l\
+|\
++ UnixTcpSocket(address: HostAddress const&)\l\
++ UnixTcpSocket(socket: SocketFD)\l\
++ ~UnixTcpSocket()\l\
++ \<\<virtual\>\> Send(data: char const*, len: size_t): ssize_t\l\
++ \<\<virtual\>\> Recv(buf: char*, len: size_t): ssize_t\l\
++ \<\<virtual\>\> Accept(): ITcpSocket*\l\
++ \<\<virtual\>\> GetSocketFD() const: SocketFD\l\
+}"
+                    ]
+
+                    sv_WindowsTcpSocket
+                    [
+    label="{\
+WindowsTcpSocket\
+|\
+- _socket: SocketFD\l\
+- _acceptor: bool\l\
+|\
++ WindowsTcpSocket(address: HostAddress const&)\l\
++ WindowsTcpSocket(socket: SocketFD)\l\
++ ~WindowsTcpSocket()\l\
++ \<\<virtual\>\> Send(data: char const*, len: size_t): ssize_t\l\
++ \<\<virtual\>\> Recv(buf: char*, len: size_t): ssize_t\l\
++ \<\<virtual\>\> Accept(): ITcpSocket*\l\
++ \<\<virtual\>\> GetSocketFD() const: SocketFD\l\
+}"
+                    ]
+                } //tcp socket
+
+                subgraph cluster_UdpSocket
+                {
+                    label = "typedef UdpSocket"
+                    fontsize = 16
+
+
+                    sv_UnixUdpSocket
+                    [
+    label="{\
+UnixUdpSocket\
+|\
+- _socket: SocketFD\l\
+|\
++ UnixUdpSocket(address: HostAddress const&)\l\
++ UnixUdpSocket(socket: SocketFD)\l\
++ ~UnixUdpSocket()\l\
++ \<\<virtual\>\> WriteDatagram(address: HostAddress const&, data: char const*, len: size_t): ssize_t\l\
++ \<\<virtual\>\> ReadDatagram(buf: char*, len: size_t): ssize_t\l\
++ \<\<virtual\>\> GetSocketFD() const: SocketFD\l\
+}"
+                    ]
+
+                    sv_WindowsUdpSocket
+                    [
+    label="{\
+WindowsUdpSocket\
+|\
+- _socket: SocketFD\l\
+|\
++ WindowsUdpSocket(address: HostAddress const&)\l\
++ WindowsUdpSocket(socket: SocketFD)\l\
++ ~WindowsUdpSocket()\l\
++ \<\<virtual\>\> WriteDatagram(address: HostAddress const&, data: char const*, len: size_t): ssize_t\l\
++ \<\<virtual\>\> ReadDatagram(buf: char*, len: size_t): ssize_t\l\
++ \<\<virtual\>\> GetSocketFD() const: SocketFD\l\
+}"
+                    ]
+
+                } //udp socket
+                sv_UnixTcpSocket -> sv_ITcpSocket
+                sv_WindowsTcpSocket -> sv_ITcpSocket
+                sv_UnixUdpSocket -> sv_IUdpSocket
+                sv_WindowsUdpSocket -> sv_IUdpSocket
+                sv_UdpSocketProxy -> sv_IUdpSocketProxy
+                sv_IUdpSocket -> sv_UdpSocketProxy [arrowhead = diamond]
+                sv_IUdpSocketProxy -> sv_Service [arrowhead = odiamond]
+                sv_TcpSocketProxy -> sv_Service [arrowhead = odiamond]
+                sv_ITcpSocket -> sv_TcpSocketProxy [arrowhead = diamond]
+                sv_IUdpSocket -> sv_Service [arrowhead = odiamond headlabel="0..n"]
+                sv_ITcpSocket -> sv_Service [arrowhead = odiamond headlabel="0..n"]
+                sv_Service -> sv_IService
+            } //network
+
+subgraph cluster_Threads
+{
+    label = "Threads"
+
+      IThread [
+    label="{\
+IThread\
+|\
+|\
++ \<\<virtual\>\> ~IThread()\l\
++ \<\<abstract\>\> Quit(): void\l\
++ \<\<abstract\>\> Join(): void\l\
+}"
+    ]
+
+     Thread [
+        label = "{\
+Thread\
+|\
+- _thread: Thread_t*\l\
+- _joined: bool\l\
+- _functor: FUNCTOR\l\
+- _Run(IThreadObject*): void*\l\
+|\
++ Thread(functor: FUNCTOR const&)\l\
++ ~Thread(void)\l\
++ Quit(void): void\l\
++ Join(void): void\l\
+}"
+    ]
+
+      IMutex [
+    label="{\
+IMutex\
+|\
+|\
++ \<\<virtual\>\> ~IMutex()\l\
++ \<\<abstract\>\> Lock(): void\l\
++ \<\<abstract\>\> TryLock(): bool\l\
++ \<\<abstract\>\> UnLock(): void\l\
+}"
+    ]
+
+      Mutex [
+    label="{\
+Mutex\
+|\
+- _mutex: Mutex_t*\l\
+- _locked: bool\l\
+|\
++ Mutex()\l\
++ ~Mutex()\l\
++ Lock(): void\l\
++ TryLock(): bool\l\
++ UnLock(): void\l\
+}"
+    ]
+
+    ScopeLock
+[
+    label="{\
+ScopeLock\
+|\
+- _mutex: IMutex&\l\
+|\
++ ScopeLock(mutex: IMutex&)\l\
++ ~ScopeLock()\l\
+}"
+]
+IMutex -> ScopeLock [arrowhead = diamond]
+    Mutex -> IMutex
+    Thread -> IThread
+
+}
+
+/* Common */
+        subgraph cluster_ServerGameAPI
+        {
+            label = "Game DLL API"
+            fontsize = 16
+
+/* Games */
+            sc_IGame
+            [
+    label="{\
+IGame\
+|\
+|\
++ \<\<virtual\>\> ~IGame()\l\
++ \<\<abstract\>\> GetName() const: String const&\l\
++ \<\<abstract\>\> Initialize(serverProxy: IServerProxy&): bool\l\
++ \<\<abstract\>\> AddPlayer(playerId: uint16_t, nick: String const&, address: HostAddress const&): void\l\
++ \<\<abstract\>\> RemovePlayer(playerId: uint16_t): void\l\
++ \<\<abstract\>\> Run(): void\l\
++ \<\<abstract\>\> Stop(): void\l\
+}"
+            ]
+
+            sc_IServerProxy
+            [
+    label="{\
+IServerProxy\
+|\
+|\
++ \<\<virtual\>\> ~IServerProxy()\l\
++ \<\<abstract\>\> GetService() const: IService*\l\
++ \<\<abstract\>\> SendTcpPacket(targetId: uint16_t, packet: Packet const&): void\l\
++ \<\<abstract\>\> GetUdpSocket(): IUdpSocket*\l\
++ \<\<abstract\>\> ReleaseUdpSocket(socket: IUdpSocket&): void\l\
++ \<\<abstract\>\> RegisterResource(infos: AResourceInfo&): void\l\
++ \<\<abstract\>\> GetGameList(): std::map\<uint16_t, String\> const&\l\
++ \<\<abstract\>\> SetClientGame(clientId: uint16_t, gameId: uint16_t): void\l\
+}"
+            ]
+
+            sc_AResourceInfo
+            [
+    label="{\
+AResourceInfo\
+|\
+- _path: String\l\
+- _id: uint16_t\l\
+|\
++ AResourceInfo()\l\
++ \<\<virtual\>\> ~AResourceInfo()\l\
++ GetPath() const: String const&\l\
++ SetPath(path: String const&): void\l\
++ GetId() const: uint16_t\l\
++ SetId(id: uint16_t): void\l\
++ \<\<abstract\>\> FillPacket(packet: Packet&) const: void\l\
++ \<\<abstract\>\> Clone() const: AResourceInfo*\l\
+}"
+            ]
+        } // game API
+
+/* Base */
+        subgraph cluster_ServerLogic
+        {
+            label = "Server Base"
+            fontsize = 16
+
+            sv_DLHandler
+            [
+    label="{\
+DLHandler\
+|\
+- _dl: DLHandle\l\
+|\
++ DLHandler(filename: String const&)\l\
++ ~DLHandler()\l\
++ GetDLSym(symname: String const&): DLSym\l\
+}"
+            ]
+
+            sv_Server
+            [
+    label="{\
+Server\
+|\
+- _gamesPath: String\l\
+- _serverProxy: IServerProxy*\l\
+- _service: IService*\l\
+- _acceptor: ITcpSocket*\l\
+- _pingTimerId: uint32_t\l\
+- _libs: std::vector\<DLHandler*\>\l\
+- _resources: std::map\<uint16_t, AResourceInfo*\>\l\
+- _nextResourceId: uint16_t\l\
+- _clients: std::map\<uint16_t, Client*\>\l\
+- _nextClientId: uint16_t\l\
+- _games: std::map\<uint16_t, IGame*\>\l\
+- _nextGameId: uint16_t\l\
+- _firstGameId: uint16_t\l\
+- _gameThreads: std::vector\<IThread*\>\l\
+- _nextUdpPort: uint16_t\l\
+- _udpSockets: std::list\<IUdpSocket*\>\l\
+- _gameList: std::map\<uint16_t, String\>\l\
+- _gameListInit: bool\l\
+|\
++ Server(gamesPath: String const&, udpPort: uint16_t, port: uint16_t, address: uint32_t)\l\
++ ~Server()\l\
+- _LoadGames(): void\l\
+- _RunGames(): void\l\
+- _AcceptHandler(errorId: int, nuSocket: ITcpSocket*): bool\l\
+- _PingHandler(timerId: uint32_t): bool\l\
++ Run(): void\l\
++ Stop(): void\l\
++ GetService() const: IService*\l\
++ SendTcpPacket(targetId: uint16_t, packet: Packet const&): void\l\
++ GetGameList(): std::map\<uint16_t, String\> const&\l\
++ SetClientGame(clientId: uint16_t, gameId: uint16_t): void\l\
++ GetUdpSocket(): IUdpSocket*\l\
++ ReleaseUdpSocket(socket: IUdpSocket&): void\l\
++ RegisterResource(infos: AResourceInfo&): void\l\
++ GetFile(resourceId: uint16_t, size: size_t&): std::ifstream*\l\
++ GetResources() const: std::map\<uint16_t, AResourceInfo*\> const&\l\
++ RemoveClient(id: uint16_t): void\l\
++ PutClientIngame(client: Client*): void\l\
+}"
+            ]
+
+            sv_Client
+            [
+    label="{\
+Client\
+|\
+- _handlers: std::map\<uint8_t, bool (Client::*)(Packet&)\>\l\
+- _id: uint16_t\l\
+- _udpPort: uint16_t\l\
+- _nick: String\l\
+- _packetCreator: PacketCreator\l\
+- _curGame: IGame*\l\
+- _socket: ITcpSocket*\l\
+- _socketProxy: TcpSocketProxy*\l\
+- _server: Server&\l\
+- _socketMutex: Mutex\l\
+- _state: State\l\
+- _didPong: bool\l\
+- _fileQueue: std::queue\<uint16_t\>\l\
+- _file: std::ifstream*\l\
+- _sendingFile: bool\l\
+|\
++ Client(socket: ITcpSocket*, service: IService*, server: Server&, id: uint16_t)\l\
++ ~Client()\l\
+- _ReadHandler(errorCode: int, data: char*, len: size_t): bool\l\
+- _ParsePacket(packet: Packet&): bool\l\
+- _AnyoneThereHandler(packet: Packet&): bool\l\
+- _INeedThisHandler(packet: Packet&): bool\l\
+- _LetsGoHandler(packet: Packet&): bool\l\
+- _PingHandler(packet: Packet&): bool\l\
+- _PongHandler(packet: Packet&): bool\l\
+- _WriteFile(): bool\l\
++ GetId() const: uint16_t\l\
++ GetNick() const: String const&\l\
++ GetUdpPort() const: uint16_t\l\
++ GetSocket(): ITcpSocket&\l\
++ SendTcpPacket(packet: Packet const&): void\l\
++ SetGame(game: IGame*): void\l\
++ GetGame(): IGame*\l\
++ DidPong() const: bool\l\
++ Ping(): void\l\
+}"
+            ]
+
+            sv_PacketCreator
+            [
+    label="{\
+PacketCreator\
+|\
+- _rawData: char*\l\
+- _rawDataSize: size_t\l\
+|\
++ PacketCreator()\l\
++ ~PacketCreator()\l\
++ PushRawData(data: char*, size: size_t): void\l\
++ GetPacket(): Packet*\l\
++ CreatePing(packet: Packet&): void\l\
++ CreatePong(packet: Packet&, ping: Packet&): void\l\
++ CreatePleaseComeIn(packet: Packet&, id: uint16_t, itemsCount: uint16_t): void\l\
++ CreateTakeThis(packet: Packet&, fileId: uint16_t, size: size_t): void\l\
+}"
+            ]
+
+    /* Games */
+            sv_ServerProxy
+            [
+    label="{\
+ServerProxy\
+|\
+- _server: Server&\l\
+- _udpSocketsMutex: Mutex\l\
+|\
++ ServerProxy(server: Server&)\l\
++ ~ServerProxy()\l\
++ \<\<virtual\>\> GetService() const: IService*\l\
++ \<\<virtual\>\> SendTcpPacket(targetId: uint16_t, packet: Packet const&): void\l\
++ \<\<virtual\>\> GetUdpSocket(): IUdpSocket*\l\
++ \<\<virtual\>\> ReleaseUdpSocket(socket: IUdpSocket&): void\l\
++ \<\<virtual\>\> RegisterResource(infos: AResourceInfo&): void\l\
++ \<\<virtual\>\> GetGameList(): std::map\<uint16_t, String\> const&\l\
++ \<\<virtual\>\> SetClientGame(clientId: uint16_t, gameId: uint16_t): void\l\
+}"
+            ]
+            IMutex -> sv_ServerProxy [arrowhead = diamond]
+            IMutex -> sv_Client [arrowhead = diamond]
+            sv_ServerProxy -> sc_IServerProxy
+            sv_ServerProxy -> sv_Server [arrowhead = diamond]
+            sv_Server -> sv_ServerProxy [arrowhead = diamond]
+            sv_PacketCreator -> sv_Client [arrowhead = diamond]
+            sv_TcpSocketProxy -> sv_Client [arrowhead = diamond]
+            sc_IServerProxy -> sv_Server [arrowhead = diamond]
+            sv_IService -> sv_Server [arrowhead = diamond]
+            sv_DLHandler -> sv_Server [arrowhead = odiamond headlabel = "0..n"]
+            sc_AResourceInfo -> sv_Server [arrowhead = odiamond headlabel = "0..n"]
+            sv_Client -> sv_Server [arrowhead = odiamond headlabel = "0..n"]
+            sc_IGame -> sv_Server [arrowhead = odiamond headlabel = "0..n"]
+            IThread -> sv_Server [arrowhead = odiamond headlabel = "0..n"]
+        } //logic
+
+} //server 2
+    }
+
+
+}
+
+/*
+Trucs utiles:
+- heritage: parent -> child
+- membre: child -> parent [arrowhead = diamond]
+- agregation: child -> parent [arrowhead = odiamond]
+- invisible:
+    parent -> child
+    [
+        style = invisible
+        arrowhead = none
+    ]
+*/

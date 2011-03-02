@@ -1,0 +1,15 @@
+libmainmenu
+mainmenu
+
+librtype
+rtype
+
+libchicken
+chicken
+
+libbomberman
+bomberman
+
+libblobby
+blobby
+

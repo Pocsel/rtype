@@ -1,0 +1,307 @@
+digraph ta_soeur_en_claquettes
+{
+    fontname = "Bitstream sans Vera"
+    compound = true;
+    ranksep = 1.25;
+    rankdir = BT;
+    label = "Generic Multiplayer Gaming P";
+    fontsize = 24;
+
+    node
+    [
+        fontname = "Monaco"
+        fontsize = 8
+        shape = "record"
+        style = filled
+        fillcolor = white
+    ]
+
+    edge
+    [
+        fontname = "Monaco"
+        fontsize = 8
+    ]
+
+/* Network */
+
+    subgraph cluster_Network
+    {
+        label = "Network"
+        fontsize = 16
+
+        sv_HostAddress
+        [
+    label="{\
+HostAddress\
+|\
+- _ip: uint32_t\l\
+- _port: uint16_t\l\
+|\
++ HostAddress()\l\
++ HostAddress(port: uint16_t, ip: uint32_t)\l\
++ HostAddress(tcpSocket: ITcpSocket const&, port: uint16_t)\l\
++ SetIp(ip: uint32_t): void\l\
++ SetPort(port: uint16_t): void\l\
++ GetIp() const: uint32_t\l\
++ GetPort() const: uint16_t\l\
++ \<\<static\>\> GetUdpPort(udpSocket: IUdpSocket const&): uint16_t\l\
++ Dump() const: void\l\
++ operator ==(other: HostAddress const&) const: bool\l\
++ operator \<(other: HostAddress const&) const: bool\l\
++ operator \>(other: HostAddress const&) const: bool\l\
+}"
+        ]
+
+        sv_IService
+        [
+    label="{\
+IService\
+|\
+|\
++ \<\<virtual\>\> ~IService()\l\
++ \<\<abstract\>\> RegisterAcceptor(socket: ITcpSocket&, handler: AcceptHandler const&): void\l\
++ \<\<abstract\>\> RegisterTcpSocket(socket: ITcpSocket&, handler: DataHandler const&): TcpSocketProxy&\l\
++ \<\<abstract\>\> RegisterUdpSocket(socket: IUdpSocket&, handler: DataHandler const&): IUdpSocketProxy&\l\
++ \<\<abstract\>\> RegisterTimer(milliseconds: uint32_t, handler: TimerHandler const&): uint32_t\l\
++ \<\<abstract\>\> UnregisterAcceptor(socket: ITcpSocket const&): void\l\
++ \<\<abstract\>\> UnregisterTcpSocket(socket: ITcpSocket const&): void\l\
++ \<\<abstract\>\> UnregisterUdpSocket(socket: IUdpSocket const&): void\l\
++ \<\<abstract\>\> UnregisterTimer(timerId: uint32_t): void\l\
++ \<\<abstract\>\> Stop(): void\l\
++ \<\<abstract\>\> Run(): void\l\
+}"
+        ]
+
+        sv_Service
+        [
+    label="{\
+Service\
+|\
+- _acceptors: std::map\<ITcpSocket*, AcceptHandler\>\l\
+- _tcpSockets: std::map\<TcpSocketProxy*, DataHandler\>\l\
+- _udpSockets: std::map\<IUdpSocketProxy*, DataHandler\>\l\
+- _timers: std::map\<uint32_t, Timer\>\l\
+- _nextTimerId: uint32_t\l\
+- _running: bool\l\
+- _readFdset: fd_set\l\
+- _writeFdset: fd_set\l\
+- _maxFd: SocketFD\l\
+- _timeOut: struct timeval\l\
+- _removedAcceptors: std::list\<ITcpSocket*\>\l\
+- _removedTcpSockets: std::list\<ITcpSocket*\>\l\
+- _removedUdpSockets: std::list\<IUdpSocket*\>\l\
+- _removedTimers: std::list\<uint32_t\>\l\
+- _rdBuff: char*\l\
+|\
++ Service()\l\
++ ~Service()\l\
+- _InitFdsets(): void\l\
+- _InitTimeOut(): void\l\
+- _Select(): void\l\
+- _ExecSockets(): void\l\
+- _ExecAcceptor(acceptor: std::map\<ITcpSocket*, AcceptHandler\>::iterator&): void\l\
+- _ExecTcpSocket(socket: std::map\<TcpSocketProxy*, DataHandler\>::iterator&): void\l\
+- _ExecUdpSocket(socket: std::map\<IUdpSocketProxy*, DataHandler\>::iterator&): void\l\
+- _ExecTimers(): void\l\
+- _CleanMaps(): void\l\
++ \<\<virtual\>\> RegisterAcceptor(socket: ITcpSocket&, handler: AcceptHandler const&): void\l\
++ \<\<virtual\>\> RegisterTcpSocket(socket: ITcpSocket&, handler: DataHandler const&): TcpSocketProxy&\l\
++ \<\<virtual\>\> RegisterUdpSocket(socket: IUdpSocket&, handler: DataHandler const&): IUdpSocketProxy&\l\
++ \<\<virtual\>\> RegisterTimer(milliseconds: uint32_t, handler: TimerHandler const&): uint32_t\l\
++ \<\<virtual\>\> UnregisterAcceptor(socket: ITcpSocket const&): void\l\
++ \<\<virtual\>\> UnregisterTcpSocket(socket: ITcpSocket const&): void\l\
++ \<\<virtual\>\> UnregisterUdpSocket(socket: IUdpSocket const&): void\l\
++ \<\<virtual\>\> UnregisterTimer(timerId: uint32_t): void\l\
++ \<\<virtual\>\> Stop(): void\l\
++ \<\<virtual\>\> Run(): void\l\
+}"
+        ]
+        sv_Service -> sv_IService
+
+        sv_ITcpSocket
+        [
+    label="{\
+ITcpSocket\
+|\
+|\
++ \<\<virtual\>\> ~ITcpSocket()\l\
++ \<\<abstract\>\> Send(data: char const*, len: size_t): ssize_t\l\
++ \<\<abstract\>\> Recv(buf: char*, len: size_t): ssize_t\l\
++ \<\<abstract\>\> Accept(): ITcpSocket*\l\
++ \<\<abstract\>\> GetSocketFD() const: SocketFD\l\
+}"
+        ]
+        sv_ITcpSocket -> sv_Service [arrowhead = odiamond headlabel="0..n"]
+
+        sv_IUdpSocket
+        [
+    label="{\
+IUdpSocket\
+|\
+|\
++ \<\<virtual\>\> ~IUdpSocket()\l\
++ \<\<abstract\>\> WriteDatagram(address: HostAddress const&, data: char const*, len: size_t): ssize_t\l\
++ \<\<abstract\>\> ReadDatagram(buf: char*, len: size_t): ssize_t\l\
++ \<\<abstract\>\> GetSocketFD() const: SocketFD\l\
+}"
+        ]
+        sv_IUdpSocket -> sv_Service [arrowhead = odiamond headlabel="0..n"]
+
+        sv_TcpSocketProxy
+        [
+    label="{\
+TcpSocketProxy\
+|\
+- _socket: ITcpSocket&\l\
+- _buff: std::list\<SendBuffer\>\l\
+- _writeHandler: WriteHandler\l\
+- _writeHandling: bool\l\
+|\
++ TcpSocketProxy(socket: ITcpSocket&)\l\
++ ~TcpSocketProxy()\l\
++ Send(packet: Packet const&): void\l\
++ HasSomethingToSend() const: bool\l\
++ SendOnNetwork(): ssize_t\l\
++ GetSocket(): ITcpSocket&\l\
++ ActivateWriteHandling(handler: WriteHandler const&): void\l\
++ DeactivateWriteHandling(): void\l\
+}"
+        ]
+        sv_TcpSocketProxy -> sv_Service [arrowhead = odiamond]
+        sv_ITcpSocket -> sv_TcpSocketProxy [arrowhead = diamond]
+
+        sv_IUdpSocketProxy
+        [
+    label="{\
+IUdpSocketProxy\
+|\
+|\
++ \<\<virtual\>\> ~IUdpSocketProxy()\l\
++ \<\<abstract\>\> Send(address: HostAddress const&, packet: Packet const&): void\l\
++ \<\<abstract\>\> HasSomethingToSend() const: bool\l\
++ \<\<abstract\>\> SendOnNetwork(): void\l\
++ \<\<abstract\>\> GetSocket(): IUdpSocket&\l\
+}"
+        ]
+        sv_IUdpSocketProxy -> sv_Service [arrowhead = odiamond]
+
+        sv_UdpSocketProxy
+        [
+    label="{\
+UdpSocketProxy\
+|\
+- _socket: IUdpSocket&\l\
+- _buff: std::map\<HostAddress, std::queue\<SendBuffer\>\>\l\
+|\
++ UdpSocketProxy(socket: IUdpSocket&)\l\
++ \<\<virtual\>\> Send(address: HostAddress const&, packet: Packet const&): void\l\
++ \<\<virtual\>\> HasSomethingToSend() const: bool\l\
++ \<\<virtual\>\> SendOnNetwork(): void\l\
++ \<\<virtual\>\> GetSocket(): IUdpSocket&\l\
+}"
+        ]
+        sv_UdpSocketProxy -> sv_IUdpSocketProxy
+        sv_IUdpSocket -> sv_UdpSocketProxy [arrowhead = diamond]
+
+        {rank=same ; sv_UdpSocketProxy ; sv_TcpSocketProxy}
+
+        subgraph cluster_TcpSocket
+        {
+            label = "typedef TcpSocket"
+            fontsize = 16
+
+            sv_UnixTcpSocket
+            [
+    label="{\
+UnixTcpSocket\
+|\
+- _socket: SocketFD\l\
+- _acceptor: bool\l\
+|\
++ UnixTcpSocket(address: HostAddress const&)\l\
++ UnixTcpSocket(socket: SocketFD)\l\
++ ~UnixTcpSocket()\l\
++ \<\<virtual\>\> Send(data: char const*, len: size_t): ssize_t\l\
++ \<\<virtual\>\> Recv(buf: char*, len: size_t): ssize_t\l\
++ \<\<virtual\>\> Accept(): ITcpSocket*\l\
++ \<\<virtual\>\> GetSocketFD() const: SocketFD\l\
+}"
+            ]
+
+            sv_WindowsTcpSocket
+            [
+    label="{\
+WindowsTcpSocket\
+|\
+- _socket: SocketFD\l\
+- _acceptor: bool\l\
+|\
++ WindowsTcpSocket(address: HostAddress const&)\l\
++ WindowsTcpSocket(socket: SocketFD)\l\
++ ~WindowsTcpSocket()\l\
++ \<\<virtual\>\> Send(data: char const*, len: size_t): ssize_t\l\
++ \<\<virtual\>\> Recv(buf: char*, len: size_t): ssize_t\l\
++ \<\<virtual\>\> Accept(): ITcpSocket*\l\
++ \<\<virtual\>\> GetSocketFD() const: SocketFD\l\
+}"
+            ]
+        }
+
+        subgraph cluster_UdpSocket
+        {
+            label = "typedef UdpSocket"
+            fontsize = 16
+
+
+            sv_UnixUdpSocket
+            [
+    label="{\
+UnixUdpSocket\
+|\
+- _socket: SocketFD\l\
+|\
++ UnixUdpSocket(address: HostAddress const&)\l\
++ UnixUdpSocket(socket: SocketFD)\l\
++ ~UnixUdpSocket()\l\
++ \<\<virtual\>\> WriteDatagram(address: HostAddress const&, data: char const*, len: size_t): ssize_t\l\
++ \<\<virtual\>\> ReadDatagram(buf: char*, len: size_t): ssize_t\l\
++ \<\<virtual\>\> GetSocketFD() const: SocketFD\l\
+}"
+            ]
+
+            sv_WindowsUdpSocket
+            [
+    label="{\
+WindowsUdpSocket\
+|\
+- _socket: SocketFD\l\
+|\
++ WindowsUdpSocket(address: HostAddress const&)\l\
++ WindowsUdpSocket(socket: SocketFD)\l\
++ ~WindowsUdpSocket()\l\
++ \<\<virtual\>\> WriteDatagram(address: HostAddress const&, data: char const*, len: size_t): ssize_t\l\
++ \<\<virtual\>\> ReadDatagram(buf: char*, len: size_t): ssize_t\l\
++ \<\<virtual\>\> GetSocketFD() const: SocketFD\l\
+}"
+            ]
+
+        }
+        sv_UnixTcpSocket -> sv_ITcpSocket
+        sv_WindowsTcpSocket -> sv_ITcpSocket
+        sv_UnixUdpSocket -> sv_IUdpSocket
+        sv_WindowsUdpSocket -> sv_IUdpSocket
+    }
+}
+
+/*
+Trucs utiles:
+- heritage: parent -> child
+- membre: child -> parent [arrowhead = diamond]
+- agregation: child -> parent [arrowhead = odiamond]
+- invisible:
+parent -> child
+[
+    style = invisible
+    arrowhead = none
+]
+*/

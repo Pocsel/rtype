@@ -1,0 +1,1523 @@
+digraph ta_soeur_en_claquettes
+{
+    fontname = "Bitstream sans Vera"
+    compound = true;
+    ranksep = 1.25;
+    rankdir = BT;
+    label = "Generic Multiplayer Gaming P";
+    fontsize = 24;
+
+    node
+    [
+        fontname = "Monaco"
+        fontsize = 8
+        shape = "record"
+        style = filled
+        fillcolor = white
+    ]
+
+    edge
+    [
+        fontname = "Monaco"
+        fontsize = 8
+    ]
+
+
+/* Common */
+    subgraph cluster_Common
+    {
+        label = "Common"
+        fontsize = 24;
+
+        cm_Packet
+        [
+    label="{\
+Packet\
+|\
+- _data: char*\l\
+- _size: size_t\l\
+- _allocSize: size_t\l\
+- _offset: mutable size_t\l\
+|\
++ Packet()\l\
++ Packet(packet: Packet const&)\l\
++ ~Packet()\l\
+- _WriteSize(): void\l\
+- _WriteByte(byte: char): void\l\
+- _Resize(target: size_t): void\l\
++ operator =(packet: Packet const&): Packet&\l\
++ BytesLeft() const: size_t\l\
++ Clear(): void\l\
++ WriteData(data: char*, size: size_t): void\l\
++ Write8(val: uint8_t): void\l\
++ Write16(val: uint16_t): void\l\
++ Write32(val: uint32_t): void\l\
++ WriteFloat(val: float): void\l\
++ WriteString(val: String const&): void\l\
++ Read8() const: uint8_t\l\
++ Read16() const: uint16_t\l\
++ Read32() const: uint32_t\l\
++ ReadFloat() const: float\l\
++ ReadString() const: String\l\
++ GetSize() const: size_t\l\
++ GetCompleteSize() const: size_t\l\
++ GetData() const: char const*\l\
++ GetCompleteData() const: char const*\l\
++ Dump() const: void\l\
+}"
+        ]
+
+        cm_String
+        [
+    label="{\
+String\
+|\
+- \<\<static\>\> _whitespaces: std::string const\l\
+|\
++ String()\l\
++ String(str: std::string const&)\l\
++ String(str: char const*)\l\
++ String(s: String const&)\l\
++ String(val: T const&): template\<typename T\>\l\
++ operator \>\>(val: T&): template\<typename T\> String&\l\
++ operator +(val: T const&) const: template\<typename T\> String\l\
++ operator +=(val: T const&): template\<typename T\> String&\l\
++ ltrim(whitespaces: std::string const&): void\l\
+}"
+        ]
+
+        cm_Log
+        [
+    label="{\
+Log\
+|\
+|\
++ \<\<static\>\> D(message: String const&): void\l\
++ \<\<static\>\> I(message: String const&): void\l\
++ \<\<static\>\> W(message: String const&): void\l\
++ \<\<static\>\> E(message: String const&): void\l\
+}"
+        ]
+
+        cm_Singleton
+        [
+            label = "Singleton"
+        ]
+
+    } //common
+
+    subgraph cluster_Games
+    {
+        label = "Games"
+        fontsize = 16
+
+        subgraph cluster_GamesCommon
+        {
+            label = "Games Common Classes"
+            fontsize = 16
+
+            subgraph cluster_Math
+            {
+                label = "Math System"
+                fontsize = 13
+
+                gc_Shape
+                [
+    label="{\
+Shape\
+|\
+|\
++ \<\<virtual\>\> ~Shape()\l\
++ \<\<abstract\>\> operator ==(shape: Shape const&) const: bool\l\
++ \<\<virtual\>\> operator ==(shape: Circle const&) const: bool\l\
++ \<\<virtual\>\> operator ==(shape: Point const&) const: bool\l\
++ \<\<virtual\>\> operator ==(shape: Rect const&) const: bool\l\
++ \<\<abstract\>\> operator !=(shape: Shape const&) const: bool\l\
++ \<\<virtual\>\> operator !=(shape: Circle const&) const: bool\l\
++ \<\<virtual\>\> operator !=(shape: Point const&) const: bool\l\
++ \<\<virtual\>\> operator !=(shape: Rect const&) const: bool\l\
++ \<\<abstract\>\> Intersect(shape: Shape const&) const: bool\l\
++ \<\<abstract\>\> Intersect(shape: Circle const&) const: bool\l\
++ \<\<abstract\>\> Intersect(shape: Point const&) const: bool\l\
++ \<\<abstract\>\> Intersect(shape: Rect const&) const: bool\l\
++ \<\<abstract\>\> Clone() const: Shape*\l\
+}"
+                ]
+
+                gc_Point
+                [
+    label="{\
+Point\
+|\
+- _x: float\l\
+- _y: float\l\
+|\
++ Point()\l\
++ Point(x: float, y: float)\l\
++ ~Point()\l\
++ GetX() const: float\l\
++ GetY() const: float\l\
++ SetX(value: float): void\l\
++ SetY(value: float): void\l\
++ GetSquaredDistance(pt: Point const&) const: float\l\
++ GetDistance(pt: Point const&) const: float\l\
++ operator +(pt: Point const&) const: Point\l\
++ operator +=(pt: Point const&): void\l\
++ operator -(pt: Point const&) const: Point\l\
++ operator -=(pt: Point const&): void\l\
++ \<\<virtual\>\> operator ==(shape: Shape const&) const: bool\l\
++ \<\<virtual\>\> operator ==(pt: Point const&) const: bool\l\
++ \<\<virtual\>\> operator !=(shape: Shape const&) const: bool\l\
++ \<\<virtual\>\> operator !=(pt: Point const&) const: bool\l\
++ \<\<virtual\>\> Intersect(shape: Shape const&) const: bool\l\
++ \<\<virtual\>\> Intersect(pt: Point const&) const: bool\l\
++ \<\<virtual\>\> Intersect(rect: Rect const&) const: bool\l\
++ \<\<virtual\>\> Intersect(circle: Circle const&) const: bool\l\
++ \<\<virtual\>\> Clone() const: Shape*\l\
+}"
+                ]
+                gc_Point -> gc_Shape
+
+                gc_Rectangle
+                [
+    label="{\
+Rect\
+|\
+- _position: Point\l\
+- _width: float\l\
+- _height: float\l\
+|\
++ Rect()\l\
++ Rect(x: float, y: float, w: float, h: float)\l\
++ Rect(pos: Point const&, w: float, h: float)\l\
++ Rect(p1: Point const&, p2: Point const&)\l\
++ ~Rect()\l\
++ GetX() const: float\l\
++ GetY() const: float\l\
++ GetPosition() const: Point const&\l\
++ GetWidth() const: float\l\
++ GetHeight() const: float\l\
++ SetPosition(x: float, y: float): void\l\
++ SetPosition(pt: Point const&): void\l\
++ SetWidth(value: float): void\l\
++ SetHeight(value: float): void\l\
++ GetTopLeft() const: Point\l\
++ GetTopRight() const: Point\l\
++ GetBottomLeft() const: Point\l\
++ GetBottomRight() const: Point\l\
++ GetCenter() const: Point\l\
++ \<\<virtual\>\> operator ==(shape: Shape const&) const: bool\l\
++ \<\<virtual\>\> operator ==(rect: Rect const&) const: bool\l\
++ \<\<virtual\>\> operator !=(shape: Shape const&) const: bool\l\
++ \<\<virtual\>\> operator !=(rect: Rect const&) const: bool\l\
++ \<\<virtual\>\> Intersect(shape: Shape const&) const: bool\l\
++ \<\<virtual\>\> Intersect(pt: Point const&) const: bool\l\
++ \<\<virtual\>\> Intersect(rect: Rect const&) const: bool\l\
++ \<\<virtual\>\> Intersect(circle: Circle const&) const: bool\l\
++ \<\<virtual\>\> Clone() const: Shape*\l\
+}"
+                ]
+                gc_Rectangle -> gc_Shape
+                gc_Point -> gc_Rectangle [arrowhead = diamond]
+
+                gc_Circle
+                [
+    label="{\
+Circle\
+|\
+- _position: Point\l\
+- _radius: float\l\
+- _sqRadius: float\l\
+|\
++ Circle()\l\
++ Circle(x: float, y: float, radius: float)\l\
++ Circle(pos: Point const&, radius: float)\l\
++ ~Circle()\l\
++ GetX() const: float\l\
++ GetY() const: float\l\
++ GetPosition() const: Point const&\l\
++ GetRadius() const: float\l\
++ SetPosition(x: float, y: float): void\l\
++ SetPosition(pt: Point const&): void\l\
++ SetRadius(value: float): void\l\
++ \<\<virtual\>\> operator ==(shape: Shape const&) const: bool\l\
++ \<\<virtual\>\> operator ==(circle: Circle const&) const: bool\l\
++ \<\<virtual\>\> operator !=(shape: Shape const&) const: bool\l\
++ \<\<virtual\>\> operator !=(circle: Circle const&) const: bool\l\
++ \<\<virtual\>\> Intersect(shape: Shape const&) const: bool\l\
++ \<\<virtual\>\> Intersect(pt: Point const&) const: bool\l\
++ \<\<virtual\>\> Intersect(rect: Rect const&) const: bool\l\
++ \<\<virtual\>\> Intersect(circle: Circle const&) const: bool\l\
++ \<\<virtual\>\> Clone() const: Shape*\l\
+}"
+                ]
+                gc_Circle -> gc_Shape
+                gc_Point -> gc_Circle [arrowhead = diamond]
+
+            {rank=same ; gc_Point ; gc_Circle ; gc_Rectangle}
+
+            } //maths
+
+            subgraph cluster_InteractionSystem
+            {
+                label = "Interaction System"
+                fontsize = 13
+
+                gc_InteractionManager
+                [
+    label="{\
+InteractionManager\<T\>\
+|\
+- _readGrid: QuadTree\<T\>*\l\
+- _writeGrid: QuadTree\<T\>*\l\
+|\
++ InteractionManager(width: size_t, height: size_t, levels: size_t)\l\
++ ~InteractionManager()\l\
++ AddInteraction(interaction: b00st::SmartPtr\<AInteraction\<T\>\> const&, shape: Shape const&): void\l\
++ ClearInteractions(): void\l\
++ SwapBuffers(): void\l\
++ Interact(entity: T&, area: Shape const&): void\l\
+}"
+                ]
+
+                gc_QuadTree
+                [
+    label="{\
+QuadTree\
+|\
+- _childs: QuadTree*[4]\l\
+- _interactions: std::list\<Interaction\>\l\
+- _area: Rect\l\
+|\
++ QuadTree(area: Rect const&, levels: size_t)\l\
++ ~QuadTree()\l\
+- _Interact(entity: Entity&, area: Shape const&, interactions: std::set\<AInteraction\<Entity\>*\>&): void\l\
++ AddInteraction(interaction: b00st::SmartPtr\<AInteraction\<Entity\>\> const&, shape: Shape const&): void\l\
++ ClearInteractions(): void\l\
++ Interact(entity: Entity&, area: Shape const&): void\l\
+}"
+                ]
+                gc_QuadTree -> gc_QuadTree [arrowhead = odiamond headlabel = "x4"]
+                gc_QuadTree -> gc_InteractionManager [arrowhead = diamond]
+                gc_Rectangle -> gc_QuadTree [arrowhead = diamond]
+
+                gc_AInteraction
+                [
+    label="{\
+AInteraction\
+|\
+- _creator: Entity*\l\
+|\
++ AInteraction(entity: Entity*)\l\
++ \<\<virtual\>\> ~AInteraction()\l\
++ \<\<abstract\>\> Interact(entity: Entity&): bool\l\
++ \<\<virtual\>\> ChangeCreator(entity: Entity*): void\l\
++ \<\<virtual\>\> GetCreator() const: Entity*\l\
+}"
+                ]
+                gc_AInteraction -> gc_QuadTree [arrowhead = odiamond]
+
+            } //interactions
+
+            subgraph cluster_ResourceSystem
+            {
+                label = "Resources System"
+                fontsize = 13
+
+                gc_AnimationResourceInfo
+                [
+    label="{\
+AnimationResourceInfo\
+|\
+- _frames: size_t\l\
+- _delay: size_t\l\
+- _isVertical: bool\l\
+|\
++ AnimationResourceInfo(path: String const&, frames: size_t, delay: size_t, isVertical: bool)\l\
++ ~AnimationResourceInfo()\l\
++ FillPacket(packet: Packet&) const: void\l\
++ Clone() const: AResourceInfo*\l\
+}"
+                ]
+
+                gc_SoundResourceInfo
+                [
+    label="{\
+SoundResourceInfo\
+|\
+- _isMusic: bool\l\
+|\
++ SoundResourceInfo(path: String const&, isMusic: bool)\l\
++ ~SoundResourceInfo()\l\
++ FillPacket(packet: Packet&) const: void\l\
++ Clone() const: AResourceInfo*\l\
+}"
+                ]
+
+                gc_ResourceManager
+                [
+    label="{\
+ResourceManager\
+|\
+- _game: BasicGame\<Entity, Player\>&\l\
+- _resources: std::map\<int, AResourceInfo*\>\l\
+|\
++ ResourceManager(game: BasicGame\<Entity, Player\>&)\l\
++ ~ResourceManager()\l\
++ GetResources() const: std::map\<int, AResourceInfo*\> const&\l\
++ Load(): bool\l\
++ RegisterResource(localId: int, resourceInfo: AResourceInfo*): void\l\
++ GetResourceId(id: int): uint16_t\l\
++ CopyResources(resources: std::map\<int, AResourceInfo*\> const&): void\l\
+}"
+                ]
+                gc_AnimationResourceInfo -> gc_ResourceManager [arrowhead = odiamond]
+                gc_SoundResourceInfo -> gc_ResourceManager [arrowhead = odiamond]
+            } //resources
+
+            subgraph cluster_GameLogicSystem
+            {
+                label = "Game Logic System"
+                fontsize = 13
+
+                gc_Entity
+                [
+                    label = "{\
+Entity|\
++ \<\<virtual\>\> Interact(interaction: InteractionType&) const: bool\l\
+|\
+--MUST BE DEFINED IN EVERY GAME DLL--\l\
+}"
+                ]
+
+                gc_Player
+                [
+                    label = "{\
+Player|\
+--MUST BE DEFINED IN EVERY GAME DLL--\l\
+(may simply be a BasicPlayer)\l\
+}"
+                ]
+
+                gc_BasicGame
+                [
+label="{\
+BasicGame\<Entity, Player\>\
+|\
+- _playerManager: PlayerManager\<Entity, Player\>*\l\
+- _entityManager: EntityManager\<Entity, Player\>*\l\
+- _resourceManager: ResourceManager\<Entity, Player\>*\l\
+- _itemManager: ItemManager\<Entity, Player\>*\l\
+- _name: String\l\
+- _frameDelay: unsigned int\l\
+- _width: unsigned int\l\
+- _height: unsigned int\l\
+- _initialized: bool\l\
+- _serverProxy: IServerProxy*\l\
+- _service: IService*\l\
+- _udpSocket: IUdpSocket*\l\
+- _socketProxy: IUdpSocketProxy*\l\
+- _clock: Clock\l\
+|\
++ BasicGame(name: String const&, frameDelay: unsigned int, width: unsigned int, height: unsigned int)\l\
++ ~BasicGame()\l\
+# \<\<virtual\>\> _PreRun(): void\l\
+# \<\<virtual\>\> _PostRun(): void\l\
+# \<\<virtual\>\> _InitializeResources(): void\l\
+# \<\<virtual\>\> _OnAddPlayer(id: uint16_t): void\l\
+# \<\<virtual\>\> _OnRemovePlayer(id: uint16_t): void\l\
+# _Tick(timerId: uint32_t): bool\l\
+# _UdpData(errorCode: int, data: char*, size: size_t): bool\l\
++ Run(): void\l\
++ Initialize(serverProxy: IServerProxy&): bool\l\
++ AddPlayer(playerId: uint16_t, nick: String const&, address: HostAddress const&): void\l\
++ RemovePlayer(playerId: uint16_t): void\l\
++ Stop(): void\l\
++ SendPacket(address: HostAddress const&, p: Packet const&): void\l\
++ GetServer(): IServerProxy&\l\
++ GetResourceManager(): ResourceManager\<Entity, Player\>&\l\
++ GetItemManager(): ItemManager\<Entity, Player\>&\l\
++ GetPlayerManager(): PlayerManager\<Entity, Player\>&\l\
++ GetEntityManager(): EntityManager\<Entity, Player\>&\l\
++ GetName() const: String const&\l\
++ GetElapsedTime(): float\l\
++ R() const: float\l\
+}"
+                ]
+                gc_InteractionManager -> gc_BasicGame [arrowhead = diamond]
+                gc_ResourceManager -> gc_BasicGame [arrowhead = diamond]
+
+                gc_Clock
+                [
+    label="{\
+Clock\
+|\
+- _baseTime: Time\l\
+|\
++ Clock()\l\
++ Reset(): void\l\
++ GetElapsedTime() const: float\l\
+}"
+                ]
+                gc_Clock -> gc_BasicGame [arrowhead = diamond]
+
+                gc_BasicPlayer
+                [
+    label="{\
+BasicPlayer\
+|\
+- _id: uint16_t\l\
+- _nick: String\l\
+- _address: HostAddress\l\
+- _keys: int[MAX_KEYS]\l\
+- _keyClicks: int[MAX_KEYS]\l\
+- _keyReleases: int[MAX_KEYS]\l\
+- _buttons: int[MAX_BUTTONS]\l\
+- _buttonClicks: int[MAX_BUTTONS]\l\
+- _buttonReleases: int[MAX_BUTTONS]\l\
+- _mouseX: size_t\l\
+- _mouseY: size_t\l\
+- _disabled: bool\l\
+|\
++ BasicPlayer(id: uint16_t, nick: String const&, address: HostAddress const&)\l\
++ \<\<virtual\>\> ~BasicPlayer()\l\
++ GetId() const: uint16_t\l\
++ GetNick() const: String const&\l\
++ GetAddress() const: HostAddress const&\l\
++ EventOnPressedKey(key: int): void\l\
++ EventOnReleasedKey(key: int): void\l\
++ EventOnPressedButton(button: int, x: size_t, y: size_t): void\l\
++ EventOnReleasedButton(button: int, x: size_t, y: size_t): void\l\
++ ResetClicks(): void\l\
++ KeyPressed(key: Gmgp::Key::Key) const: bool\l\
++ KeyClicked(key: Gmgp::Key::Key) const: bool\l\
++ KeyReleased(key: Gmgp::Key::Key) const: bool\l\
++ ButtonPressed(button: Gmgp::Mouse::Mouse) const: bool\l\
++ ButtonClicked(button: Gmgp::Mouse::Mouse) const: bool\l\
++ ButtonReleased(button: Gmgp::Mouse::Mouse) const: bool\l\
++ GetMouseX() const: size_t\l\
++ GetMouseY() const: size_t\l\
++ DisableItems(enable: bool): void\l\
++ IsDisabled() const: bool\l\
+}"
+                ]
+                gc_Player -> gc_BasicPlayer
+
+                gc_EntityManager
+                [
+    label="{\
+EntityManager\<Entity, Player\>\
+|\
+- _game: BasicGame\<Entity, Player\>&\l\
+- _interactionManager: InteractionManager\<Entity\>\l\
+- _entities: std::list\<Entity*\>\l\
+- _registerPool: std::list\<Entity*\>\l\
+- _unregisterPool: std::list\<Entity*\>\l\
+|\
++ EntityManager(game: BasicGame\<Entity, Player\>&)\l\
++ ~EntityManager()\l\
+- _ProcessRegisterPool(): void\l\
+- _ProcessUnregisterPool(): void\l\
++ RegisterEntity(entity: Entity*): void\l\
++ UnregisterEntity(entity: Entity*): void\l\
++ IsInUnregisterPool(entity: Entity*): bool\l\
++ Run(time: float): void\l\
++ GetInteractionManager(): InteractionManager\<Entity\>&\l\
+}"
+                ]
+                gc_InteractionManager -> gc_EntityManager [arrowhead = diamond]
+                gc_EntityManager -> gc_BasicGame [arrowhead = diamond]
+                gc_Entity -> gc_EntityManager
+
+                gc_Item
+                [
+    label="{\
+Item\
+|\
+# _playerId: uint16_t\l\
+# _lastTime: float\l\
+# _mask: uint16_t\l\
+# _updated: bool\l\
+# _resourceId: uint32_t\l\
+# _posX: float\l\
+# _posY: float\l\
+# _speedX: float\l\
+# _speedY: float\l\
+# _accelX: float\l\
+# _accelY: float\l\
+# _lifeTimeMs: size_t\l\
+# _lifeTimeCycles: size_t\l\
+# _disapear: bool\l\
+# _posZ: size_t\l\
+# _blinking: size_t\l\
+# _cursor: bool\l\
+# _frame: size_t\l\
+|\
++ Item(spawnTime: float)\l\
++ ~Item()\l\
++ SetPlayerId(id: uint16_t): void\l\
++ GetPlayerId() const: uint16_t\l\
++ Run(time: float): void\l\
++ ResetParamMask(): void\l\
++ HasChanged() const: bool\l\
++ SetChanged(enable: bool): void\l\
++ GetParamMask() const: uint16_t\l\
++ SetResourceId(id: uint32_t): void\l\
++ GetResourceId() const: uint32_t\l\
++ SetPositionX(pos: float): void\l\
++ GetPositionX() const: float\l\
++ SetPositionY(pos: float): void\l\
++ GetPositionY() const: float\l\
++ SetSpeedX(speed: float): void\l\
++ GetSpeedX() const: float\l\
++ SetSpeedY(speed: float): void\l\
++ GetSpeedY() const: float\l\
++ SetAccelX(accel: float): void\l\
++ GetAccelX() const: float\l\
++ SetAccelY(accel: float): void\l\
++ GetAccelY() const: float\l\
++ SetLifeTimeMs(ms: size_t): void\l\
++ GetLifeTimeMs() const: size_t\l\
++ SetLifeTimeCycles(cycles: size_t): void\l\
++ GetLifeTimeCycles() const: size_t\l\
++ SetDisapear(enable: bool): void\l\
++ GetDisapear() const: bool\l\
++ SetPositionZ(pos: size_t): void\l\
++ GetPositionZ() const: size_t\l\
++ SetBlinking(freq: size_t): void\l\
++ GetBlinking() const: size_t\l\
++ SetCursor(enable: bool): void\l\
++ GetCursor() const: bool\l\
++ SetFrame(frame: size_t): void\l\
++ GetFrame() const: size_t\l\
+}"
+                ]
+
+                gc_ItemManager
+                [
+    label="{\
+ItemManager\<Entity, Player\>\
+|\
+- _game: BasicGame\<Entity, Player\>&\l\
+- _buffers: std::map\<HostAddress, Packet*\>\l\
+- _itemId: uint32_t\l\
+- _items: std::map\<Item*, uint32_t\>\l\
+- _packet: Packet*\l\
+|\
++ ItemManager(game: BasicGame\<Entity, Player\>&)\l\
++ ~ItemManager()\l\
+- _AddItemToBuffers(item: Item*, id: uint32_t, deletion: bool): void\l\
+- _SendPackets(): void\l\
+- _GetPacketOfPlayer(playerId: uint16_t): Packet*\l\
++ SendItem(item: Item&): uint32_t\l\
++ Run(time: float): void\l\
++ RefreshPlayer(playerId: uint16_t): void\l\
++ RemoveAllItemsOfPlayer(playerId: uint16_t): void\l\
++ SendDeletionForItemsOfPlayer(playerId: uint16_t): void\l\
++ AddItem(item: Item*): bool\l\
++ RemoveItem(item: Item*, sendPacket: bool, updateItem: bool): bool\l\
++ GetNumberOfItems() const: size_t\l\
++ HasItem(item: Item*) const: bool\l\
+}"
+                ]
+                gc_Item -> gc_ItemManager [arrowhead = odiamond headlabel = "0..n"]
+                gc_ItemManager -> gc_BasicGame [arrowhead = diamond]
+
+                gc_PlayerManager
+                [
+    label="{\
+PlayerManager\<Entity, Player\>\
+|\
+- _game: BasicGame\<Entity, Player\>&\l\
+- _players: std::map\<size_t, Player*\>\l\
+- _newPlayers: std::list\<PlayerMetadata*\>\l\
+- _removedPlayers: std::list\<size_t\>\l\
+- _mutex: mutable Mutex\l\
+|\
++ PlayerManager(game: BasicGame\<Entity, Player\>&)\l\
++ ~PlayerManager()\l\
++ FlushEvents(): void\l\
++ GetPlayerIdList() const: std::list\<uint16_t\>\l\
++ SendPacket(packet: Packet const&, id: uint16_t): bool\l\
++ AddPlayer(id: size_t, nick: String const&, address: HostAddress const&): void\l\
++ HasPlayer(id: size_t) const: bool\l\
++ RemovePlayer(id: size_t): void\l\
++ GetNumberOfPlayers() const: size_t\l\
++ GetPlayer(id: size_t): Player&\l\
+}"
+                ]
+                gc_BasicPlayer -> gc_PlayerManager [arrowhead = odiamond headlabel = "0..n"]
+                gc_PlayerManager -> gc_BasicGame [arrowhead = diamond]
+
+            } //game logic
+
+        } //game common
+
+        subgraph cluster_RType
+        {
+            label = "RType DLL"
+            fontsize = 16
+
+
+            subgraph cluster_RtypeCommon
+            {
+                    label = "Common"
+
+            rt_Item [label = "{Item}"]
+
+            rt_TextEntity
+            [
+    label="{\
+TextEntity\
+|\
+- _text: String\l\
+- _resourceId: uint16_t\l\
+- _spacing: float\l\
+- _chars: std::list\<Item*\>\l\
+- _autoRemove: bool\l\
+- _autoRemoveTime: float\l\
+- _removeStyle: RemoveStyle\l\
+|\
++ TextEntity(game: G&, resourceId: uint16_t, spacing: float, playerId: uint16_t)\l\
++ \<\<virtual\>\> ~TextEntity()\l\
+- _RemoveChars(style: RemoveStyle): void\l\
++ Run(time: float): void\l\
++ SetText(text: String const&): void\l\
++ GetText() const: String const&\l\
++ GetResourceId() const: uint16_t\l\
++ GetSpacing() const: float\l\
++ EnableAutoRemove(time: float): void\l\
++ HasAutoRemove() const: bool\l\
++ DisableAutoRemove(): void\l\
++ SetPosition(x: float, y: float, z: uint8_t): void\l\
++ SetBlinking(freq: size_t): void\l\
++ SetSpeed(x: float, y: float): void\l\
++ SetAccel(x: float, y: float): void\l\
++ SetRemoveStyle(style: RemoveStyle): void\l\
++ GetRemoveStyle() const: RemoveStyle\l\
+}"
+            ]
+
+
+            } //RtypeCommon
+
+            subgraph cluster_RtypeMenu
+            {
+                label = "Menu"
+
+            rt_ButtonEntity
+            [
+    label="{\
+ButtonEntity\
+|\
+- _text: TextEntity\<MenuEntity, MainGame\>*\l\
+- _x: float\l\
+- _y: float\l\
+- _z: uint8_t\l\
+- _width: size_t\l\
+- _hover: bool\l\
+- _clicked: bool\l\
+|\
++ ButtonEntity(game: MainGame&, playerId: uint16_t)\l\
++ ~ButtonEntity()\l\
+- _Hover(): bool\l\
++ Run(time: float): void\l\
++ SetPosition(x: float, y: float, z: uint8_t): void\l\
++ SetText(text: String const&): void\l\
++ Clicked() const: bool\l\
+}"
+            ]
+
+            rt_MainGame
+            [
+    label="{\
+MainGame\
+|\
+- _games: std::list\<GameMetadata*\>\l\
+- _mutex: mutable Mutex\l\
+|\
++ MainGame()\l\
++ ~MainGame()\l\
+- _RemovePlayerFromSubGames(playerId: uint16_t): void\l\
+- _Load(id: int, res: AResourceInfo*): void\l\
+# \<\<virtual\>\> _InitializeResources(): void\l\
+# \<\<virtual\>\> _OnRemovePlayer(playerId: uint16_t): void\l\
++ CreateGame(playerId: uint16_t): void\l\
++ JoinGame(playerId: uint16_t, targetId: uint16_t): void\l\
++ LeaveGame(playerId: uint16_t): void\l\
++ GetNumberOfGames() const: size_t\l\
++ GetGameList() const: std::map\<uint16_t, String\>\l\
+}"
+            ]
+
+            rt_MainMenuEntity
+            [
+    label="{\
+MainMenuEntity\
+|\
+- _Background: Item\l\
+- _createGame: ButtonEntity*\l\
+- _nbGames: size_t\l\
+- _list: std::map\<uint16_t, ButtonEntity*\>\l\
+- _gameTarget: uint16_t\l\
+- _leaveTime: float\l\
+|\
++ MainMenuEntity(game: MainGame&, playerId: uint16_t)\l\
++ ~MainMenuEntity()\l\
+- _DisablePlayer(): void\l\
+- _UpdateGameList(): void\l\
+- _RemoveGameList(): void\l\
++ Run(time: float): void\l\
+}"
+            ]
+
+            rt_MenuEntity
+            [
+    label="{\
+MenuEntity\
+|\
+- _name: String\l\
+- _playerId: uint16_t\l\
+# _game: MainGame&\l\
+|\
++ MenuEntity(game: MainGame&, name: String const&, playerId: uint16_t)\l\
++ \<\<virtual\>\> ~MenuEntity()\l\
++ \<\<virtual\>\> GenerateInteractions(time: float): void\l\
++ \<\<virtual\>\> Run(time: float): void\l\
++ SetName(name: String const&): void\l\
++ GetName() const: String const&\l\
++ GetPlayerId() const: uint16_t\l\
++ SetPlayerId(playerId: uint16_t): void\l\
+}"
+            ]
+
+            rt_MenuPlayer
+            [
+    label="{\
+MenuPlayer\
+|\
+- _game: MainGame&\l\
+- _cursor: Item\l\
+- _mainMenu: MainMenuEntity*\l\
+|\
++ MenuPlayer(id: uint16_t, nick: String const&, address: HostAddress const&, game: BasicGame\<MenuEntity, MenuPlayer\>&)\l\
++ ~MenuPlayer()\l\
+}"
+            ]
+
+            } //RtypeMenu
+
+            subgraph cluster_RtypeGame
+            {
+                label = "Game"
+
+
+subgraph cluster_rtypegamebase
+{
+    label = "Base"
+
+            rt_EntityManager [label = "{EntityManager\<GameEntity, GamePlayer\>}"]
+
+            rt_Decorator
+            [
+    label="{\
+Decorator\
+|\
++ Explosion\<T\>(id: int, entity: T&): static inline void\l\
+}"
+            ]
+
+            rt_Game
+            [
+    label="{\
+Game\
+|\
+- _mainGame: MainGame*\l\
+- _creatorId: uint16_t\l\
+- _map: MapEntity*\l\
+- _bg: BackgroundEntity*\l\
+|\
++ Game(playerId: uint16_t)\l\
++ ~Game()\l\
+# \<\<virtual\>\> _PreRun(): void\l\
+# \<\<virtual\>\> _PostRun(): void\l\
++ SetResources(resources: std::map\<int, AResourceInfo*\> const&): void\l\
++ SetMainGame(mainGame: MainGame*): void\l\
++ GetMainGame() const: MainGame*\l\
+}"
+            ]
+
+            rt_GamePlayer
+            [
+    label="{\
+GamePlayer\
+|\
+- _game: Game&\l\
+- Decorator: friend class\l\
+- _player: PlayerEntity*\l\
+|\
++ GamePlayer(id: uint16_t, nick: String const&, address: HostAddress const&, game: BasicGame\<GameEntity, GamePlayer\>&)\l\
++ ~GamePlayer()\l\
+}"
+            ]
+
+}//base
+
+subgraph cluster_rtypegameentities
+{
+    label = "Entities"
+
+            rt_BulletEntity
+            [
+    label="{\
+BulletEntity\
+|\
+# _sprite: Item\l\
+# _explosionLocalId: int\l\
+# _damage: InteractionPtr\l\
+# _radius: float\l\
+# _explosionRadius: float\l\
+|\
+# BulletEntity(game: Game&, damage: InteractionPtr const&, spriteLocalId: int, explosionLocalId: int, posX: float, posY: float, speedX: float, speedY: float, radius: float, explosionRadius: float, playerId: uint16_t)\l\
++ \<\<virtual\>\> ~BulletEntity()\l\
+# _Explode(damage: bool): void\l\
++ \<\<virtual\>\> Run(time: float): void\l\
++ \<\<virtual\>\> Interact(interaction: WallInteraction&): bool\l\
+}"
+            ]
+
+            rt_EnduranceMap1Entity
+            [
+    label="{\
+EnduranceMap1Entity\
+|\
+- _wallGenerator: WallGeneratorEntity\l\
+- _monsterGenerators: std::vector\<MonsterGeneratorEntity*\>\l\
+- _forces: std::vector\<ForceEntity*\>\l\
+|\
++ EnduranceMap1Entity(game: Game&)\l\
++ \<\<virtual\>\> ~EnduranceMap1Entity()\l\
+- _IncreaseLevel(): void\l\
+- _SpawnPowerUp(): void\l\
+}"
+            ]
+
+            rt_EnemyBulletEntity
+            [
+    label="{\
+EnemyBulletEntity\
+|\
+|\
++ EnemyBulletEntity(game: Game&, damage: InteractionPtr const&, spriteLocalId: int, explosionLocalId: int, posX: float, posY: float, speedX: float, speedY: float, radius: float, explosionRadius: float, playerId: uint16_t)\l\
++ ~EnemyBulletEntity()\l\
++ \<\<virtual\>\> Interact(interaction: ShipInteraction&): bool\l\
++ \<\<virtual\>\> Interact(interaction: ShieldInteraction&): bool\l\
+}"
+            ]
+
+            rt_ForceEntity
+            [
+    label="{\
+ForceEntity\
+|\
+- _damage: InteractionPtr\l\
+- _shield: InteractionPtr\l\
+- _playerId: uint16_t\l\
+- _sprite: Item\l\
+- _state: int\l\
+- _target: Point\l\
+- _speed: float\l\
+- _attracts: std::list\<Point\>\l\
+- _lastFireTime: float\l\
+|\
++ ForceEntity(game: Game&)\l\
++ ~ForceEntity()\l\
+- _MoveToTarget(): bool\l\
+- _IsNearX(x: float) const: bool\l\
+- _IsNearY(y: float) const: bool\l\
+- _NewPosition(): void\l\
+- _ChooseNearestTarget(): void\l\
++ \<\<virtual\>\> GenerateInteractions(time: float): void\l\
++ \<\<virtual\>\> Run(time: float): void\l\
++ \<\<virtual\>\> Interact(i: ForceAttachInteraction&): bool\l\
++ \<\<virtual\>\> Interact(i: ForceControlInteraction&): bool\l\
++ \<\<virtual\>\> Interact(i: ForceFireInteraction&): bool\l\
+}"
+            ]
+
+            rt_FriendlyBulletEntity
+            [
+    label="{\
+FriendlyBulletEntity\
+|\
+- _collisionCount: int\l\
+|\
++ FriendlyBulletEntity(game: Game&, damage: InteractionPtr const&, spriteLocalId: int, explosionLocalId: int, posX: float, posY: float, speedX: float, speedY: float, radius: float, explosionRadius: float, playerId: uint16_t)\l\
++ ~FriendlyBulletEntity()\l\
++ SetCollisionCount(collisionCount: int): void\l\
++ \<\<virtual\>\> Interact(interaction: MonsterInteraction&): bool\l\
+}"
+            ]
+
+            rt_GameEntity
+            [
+    label="{\
+GameEntity\
+|\
+- _name: String\l\
+- _playerId: uint16_t\l\
+# _game: Game&\l\
+|\
++ GameEntity(game: Game&, name: String const&, playerId: uint16_t)\l\
++ \<\<virtual\>\> ~GameEntity()\l\
++ \<\<virtual\>\> GenerateInteractions(time: float): void\l\
++ \<\<virtual\>\> Run(time: float): void\l\
++ SetName(name: String const&): void\l\
++ GetName() const: String const&\l\
++ GetPlayerId() const: uint16_t\l\
++ SetPlayerId(playerId: uint16_t): void\l\
++ \<\<virtual\>\> Interact(interaction: EnemyDamageInteraction&): bool\l\
++ \<\<virtual\>\> Interact(interaction: FriendlyDamageInteraction&): bool\l\
++ \<\<virtual\>\> Interact(interaction: MonsterInteraction&): bool\l\
++ \<\<virtual\>\> Interact(interaction: ShipInteraction&): bool\l\
++ \<\<virtual\>\> Interact(interaction: WallInteraction&): bool\l\
++ \<\<virtual\>\> Interact(interaction: ForceFireInteraction&): bool\l\
++ \<\<virtual\>\> Interact(interaction: ForceControlInteraction&): bool\l\
++ \<\<virtual\>\> Interact(interaction: ForceAttachInteraction&): bool\l\
++ \<\<virtual\>\> Interact(interaction: BonusInteraction&): bool\l\
++ \<\<virtual\>\> Interact(interaction: ShieldInteraction&): bool\l\
++ \<\<virtual\>\> Interact(interaction: TriggerInteraction&): bool\l\
+}"
+            ]
+
+            rt_GarbageEntity
+            [
+    label="{\
+GarbageEntity\
+|\
+- _sprite: Item\l\
+- _interaction: InteractionPtr\l\
+- _width: float\l\
+- _height: float\l\
+|\
++ GarbageEntity(game: Game&, resourceLocalId: int, up: bool, width: float, height: float, posX: float)\l\
++ ~GarbageEntity()\l\
++ \<\<virtual\>\> GenerateInteractions(time: float): void\l\
++ \<\<virtual\>\> Run(time: float): void\l\
+}"
+            ]
+
+            rt_GarbageSpawnerEntity
+            [
+    label="{\
+GarbageSpawnerEntity\
+|\
+- _up: bool\l\
+- _sprite: Item\l\
+- _curFrame: int\l\
+- _wallInteraction: InteractionPtr\l\
+- _trigger: InteractionPtr\l\
+- _actions: std::queue\<void (GarbageSpawnerEntity::*)(void)\>\l\
+- _garbage: std::vector\<GarbageInfo\>\l\
+- _triggered: bool\l\
+- _empty: bool\l\
+- _nextActionTime: float\l\
+|\
++ GarbageSpawnerEntity(game: Game&, up: bool)\l\
++ ~GarbageSpawnerEntity()\l\
+- _IncreaseFrame(): void\l\
+- _SpawnGarbage(): void\l\
+- _Act(): void\l\
++ \<\<virtual\>\> GenerateInteractions(time: float): void\l\
++ \<\<virtual\>\> Run(time: float): void\l\
+}"
+            ]
+
+            rt_LittleRobotMobEntity
+            [
+    label="{\
+LittleRobotMobEntity\
+|\
+- _nextBulletTime: float\l\
+- _nextMoveTime: float\l\
+|\
++ LittleRobotMobEntity(game: Game&, y: float)\l\
++ ~LittleRobotMobEntity()\l\
+- _RandomizeVerticalSpeed(): void\l\
+- _ShootBullet(): void\l\
+# _Run(time: float): void\l\
+}"
+            ]
+
+            rt_MapEntity
+            [
+    label="{\
+MapEntity\
+|\
+- _events: std::list\<Event\>\l\
+|\
+# MapEntity(game: Game&)\l\
++ \<\<virtual\>\> ~MapEntity()\l\
+# _RegisterEvent(time: float, handler: EventHandler const&): void\l\
++ \<\<virtual\>\> Run(time: float): void\l\
+}"
+            ]
+
+            rt_MonsterEntity
+            [
+    label="{\
+MonsterEntity\
+|\
+# _sprite: Item\l\
+# _interaction: InteractionPtr\l\
+# _width: float\l\
+# _height: float\l\
+# _life: int\l\
+# _explosionId: int\l\
+|\
+# MonsterEntity(game: Game&, spriteId: int, explosionId: int, y: float, speedX: float, w: float, h: float, life: int)\l\
++ \<\<virtual\>\> ~MonsterEntity()\l\
+# \<\<virtual\>\> _Run(time: float): void\l\
+# _Damage(damage: int): bool\l\
++ \<\<virtual\>\> GenerateInteractions(time: float): void\l\
++ \<\<virtual\>\> Run(time: float): void\l\
++ \<\<virtual\>\> Interact(interaction: FriendlyDamageInteraction&): bool\l\
++ \<\<virtual\>\> Interact(interaction: ShipInteraction&): bool\l\
++ \<\<virtual\>\> Interact(interaction: WallInteraction&): bool\l\
+}"
+            ]
+
+            rt_MonsterGeneratorEntity
+            [
+    label="{\
+MonsterGeneratorEntity\
+|\
+- _nextSpawn: float\l\
+|\
++ MonsterGeneratorEntity(game: Game&)\l\
++ ~MonsterGeneratorEntity()\l\
++ Run(time: float): void\l\
+}"
+            ]
+
+            rt_PlayerEntity
+            [
+    label="{\
+PlayerEntity\
+|\
+- _ship: ShipEntity*\l\
+- _leaving: bool\l\
+- _leaveTime: float\l\
+|\
++ PlayerEntity(game: Game&, playerId: uint16_t, nick: String const&)\l\
++ ~PlayerEntity()\l\
++ \<\<virtual\>\> Run(time: float): void\l\
+}"
+            ]
+
+            rt_ShipEntity
+            [
+    label="{\
+ShipEntity\
+|\
+- _sprite: Item\l\
+- _shipInteraction: InteractionPtr\l\
+- _forceFront: InteractionPtr\l\
+- _forceBack: InteractionPtr\l\
+- _forceControlFront: InteractionPtr\l\
+- _forceControlBack: InteractionPtr\l\
+- _forceFire: InteractionPtr\l\
+- _direction: int\l\
+- _nextDirection: int\l\
+- _nextDirectionTime: float\l\
+- _state: State\l\
+- _spawnTime: float\l\
+- _powerCadreSprite: Item\l\
+- _powerSprite: Item\l\
+- _powerLoadingSprite: Item\l\
+- _loadingPower: bool\l\
+- _loadedPower: bool\l\
+- _powerLoadedTime: float\l\
+- _missiles: std::vector\<void (ShipEntity::*)(void)\>\l\
+|\
++ ShipEntity(game: Game&, playerId: uint16_t)\l\
++ ~ShipEntity()\l\
+- _Spawn(): void\l\
+- _Explode(): void\l\
+- _GetNextDirection(): void\l\
+- _ShootMissile(power: float): void\l\
+- _ShootMissile0(): void\l\
+- _ShootMissile1(): void\l\
+- _ShootMissile2(): void\l\
+- _ShootMissile3(): void\l\
+- _ShootMissile4(): void\l\
+- _ShootMissile5(): void\l\
+- _SetPowerSpriteEmpty(): void\l\
+- _SetPowerSpriteLoading(): void\l\
+- _SetPowerSpriteFull(): void\l\
+- _UpdateForceAttractions(): void\l\
++ \<\<virtual\>\> GenerateInteractions(time: float): void\l\
++ \<\<virtual\>\> Run(time: float): void\l\
++ InfoText(text: String const&): void\l\
++ \<\<virtual\>\> Interact(interaction: EnemyDamageInteraction&): bool\l\
++ \<\<virtual\>\> Interact(interaction: WallInteraction&): bool\l\
++ \<\<virtual\>\> Interact(interaction: MonsterInteraction&): bool\l\
++ \<\<virtual\>\> Interact(interaction: TriggerInteraction&): bool\l\
+}"
+            ]
+
+            rt_WallEntity
+            [
+    label="{\
+WallEntity\
+|\
+- _sprite: Item\l\
+- _interaction: InteractionPtr\l\
+- _width: float\l\
+- _height: float\l\
+|\
++ WallEntity(game: Game&, resourceLocalId: int, up: bool, width: float, height: float)\l\
++ ~WallEntity()\l\
++ \<\<virtual\>\> GenerateInteractions(time: float): void\l\
++ \<\<virtual\>\> Run(time: float): void\l\
+}"
+            ]
+
+            rt_WallGeneratorEntity
+            [
+    label="{\
+WallGeneratorEntity\
+|\
+- _nextUpSpawn: float\l\
+- _nextDownSpawn: float\l\
+- _upWalls: std::vector\<WallInfo\>\l\
+- _downWalls: std::vector\<WallInfo\>\l\
+|\
++ WallGeneratorEntity(game: Game&, wallSet: int)\l\
++ ~WallGeneratorEntity()\l\
+- _Nothing(): void\l\
+- _GarbageSpawnerUp(): void\l\
+- _GarbageSpawnerDown(): void\l\
++ Run(time: float): void\l\
+}"
+            ]
+
+            rt_WeakMobEntity
+            [
+    label="{\
+WeakMobEntity\
+|\
+- _nextDirectionTime: float\l\
+|\
++ WeakMobEntity(game: Game&, y: float)\l\
++ ~WeakMobEntity()\l\
+# _Run(time: float): void\l\
+}"
+            ]
+
+            rt_BackgroundEntity
+            [
+    label="{\
+BackgroundEntity\
+|\
+- _resourceId: uint16_t\l\
+- _width: int\l\
+- _yOffset: int\l\
+- _speed: float\l\
+- _nextSpawn: float\l\
+- _items: std::list\<Item*\>\l\
+|\
++ BackgroundEntity(game: Game&, resourceId: uint16_t, width: int, yOffset: int, speed: float)\l\
++ ~BackgroundEntity()\l\
++ \<\<virtual\>\> Run(time: float): void\l\
+}"
+            ]
+
+}//entities
+
+subgraph cluster_rtypegameinteractions
+{
+    label = "Interactions"
+
+            rt_ForceControlInteraction
+            [
+    label="{\
+ForceControlInteraction\
+|\
+- _playerId: uint16_t\l\
+- _pos: Point\l\
+|\
++ ForceControlInteraction(playerId: uint16_t, entity: GameEntity*)\l\
++ ~ForceControlInteraction()\l\
++ Interact(entity: GameEntity&): bool\l\
++ SetPos(p: Point const&): void\l\
++ GetPos() const: Point const&\l\
++ GetPlayerId() const: uint16_t\l\
+}"
+            ]
+
+            rt_ForceFireInteraction
+            [
+    label="{\
+ForceFireInteraction\
+|\
+- _playerId: uint16_t\l\
+|\
++ ForceFireInteraction(playerId: uint16_t, entity: GameEntity*)\l\
++ ~ForceFireInteraction()\l\
++ Interact(entity: GameEntity&): bool\l\
++ GetPlayerId() const: uint16_t\l\
+}"
+            ]
+
+            rt_FriendlyDamageInteraction
+            [
+    label="{\
+FriendlyDamageInteraction\
+|\
++ FriendlyDamageInteraction(damage: size_t, entity: GameEntity*)\l\
++ \<\<virtual\>\> Interact(entity: GameEntity&): bool\l\
+}"
+            ]
+
+            rt_MonsterInteraction
+            [
+    label="{\
+MonsterInteraction\
+|\
++ MonsterInteraction(entity: GameEntity*)\l\
++ ~MonsterInteraction()\l\
++ \<\<virtual\>\> Interact(entity: GameEntity&): bool\l\
+}"
+            ]
+
+            rt_ShieldInteraction
+            [
+    label="{\
+ShieldInteraction\
+|\
++ ShieldInteraction(entity: GameEntity*)\l\
++ ~ShieldInteraction()\l\
++ Interact(entity: GameEntity&): bool\l\
+}"
+            ]
+
+            rt_ShipInteraction
+            [
+    label="{\
+ShipInteraction\
+|\
++ ShipInteraction(entity: GameEntity*)\l\
++ ~ShipInteraction()\l\
++ \<\<virtual\>\> Interact(entity: GameEntity&): bool\l\
+}"
+            ]
+
+            rt_TriggerInteraction
+            [
+    label="{\
+TriggerInteraction\
+|\
+- _active: bool\l\
+|\
++ TriggerInteraction(entity: GameEntity*)\l\
++ \<\<virtual\>\> ~TriggerInteraction()\l\
++ Activate(): void\l\
++ IsActive() const: bool\l\
++ \<\<virtual\>\> Interact(entity: GameEntity&): bool\l\
+}"
+            ]
+
+            rt_WallInteraction
+            [
+    label="{\
+WallInteraction\
+|\
+- _pos: Point\l\
+|\
++ WallInteraction()\l\
++ ~WallInteraction()\l\
++ \<\<virtual\>\> Interact(entity: GameEntity&): bool\l\
++ SetPosition(x: float, y: float): void\l\
++ GetPosition() const: Point const&\l\
+}"
+            ]
+
+            rt_ADamageInteraction
+            [
+    label="{\
+ADamageInteraction\
+|\
+- _damage: size_t\l\
+|\
++ ADamageInteraction(damage: size_t, entity: GameEntity*)\l\
++ \<\<virtual\>\> ~ADamageInteraction()\l\
++ GetValue() const: size_t\l\
+}"
+            ]
+
+            rt_BonusInteraction
+            [
+    label="{\
+BonusInteraction\
+|\
+- _type: int\l\
+- _isPickedUp: bool\l\
+|\
++ BonusInteraction(type: int, entity: GameEntity*)\l\
++ ~BonusInteraction()\l\
++ Interact(entity: GameEntity&): bool\l\
++ PickUp(): void\l\
++ IsPickedUp() const: bool\l\
++ GetType() const: int\l\
+}"
+            ]
+
+            rt_EnemyDamageInteraction
+            [
+    label="{\
+EnemyDamageInteraction\
+|\
++ EnemyDamageInteraction(damage: size_t, entity: GameEntity*)\l\
++ \<\<virtual\>\> Interact(entity: GameEntity&): bool\l\
+}"
+            ]
+
+            rt_ForceAttachInteraction
+            [
+    label="{\
+ForceAttachInteraction\
+|\
+- _pos: Point\l\
+- _playerId: uint16_t\l\
+- _isFront: bool\l\
+|\
++ ForceAttachInteraction(playerId: uint16_t, isFront: bool, entity: GameEntity*)\l\
++ ~ForceAttachInteraction()\l\
++ Interact(entity: GameEntity&): bool\l\
++ GetPlayerId() const: uint16_t\l\
++ SetPos(p: Point const&): void\l\
++ GetPos() const: Point const&\l\
++ IsFront() const: bool\l\
+}"
+            ]
+
+            rt_Interaction [label = "{AInteraction\<GameEntity\>}"]
+
+}//interactions
+
+
+
+
+            } //RtypeGame
+
+
+/*style
+rt_Game -> rt_Item [arrowhead = none style = invisible]
+rt_Game -> rt_TextEntity [arrowhead = none style = invisible]
+rt_MainGame -> rt_Item [arrowhead = none style = invisible]
+rt_MainGame -> rt_TextEntity [arrowhead = none style = invisible]
+rt_Interaction -> rt_Item [arrowhead = none style = invisible]
+rt_Interaction -> rt_TextEntity [arrowhead = none style = invisible]
+rt_MenuEntity -> rt_Item [arrowhead = none style = invisible]
+rt_MenuEntity -> rt_TextEntity [arrowhead = none style = invisible]
+rt_GameEntity -> rt_Item [arrowhead = none style = invisible]
+rt_GameEntity -> rt_TextEntity [arrowhead = none style = invisible]
+end style*/
+
+            rt_GameEntity -> rt_EntityManager [arrowhead = odiamond headlabel = "0..n"]
+            rt_EntityManager -> rt_Game [arrowhead = diamond]
+            rt_WeakMobEntity -> rt_MonsterEntity
+            rt_WallInteraction -> rt_Interaction
+            rt_WallGeneratorEntity -> rt_GameEntity
+            rt_WallEntity -> rt_GameEntity
+            rt_Item -> rt_WallEntity [arrowhead = diamond]
+            rt_WallInteraction -> rt_WallEntity [arrowhead = diamond]
+            rt_TriggerInteraction -> rt_Interaction
+            rt_TextEntity -> rt_GameEntity
+            rt_TextEntity -> rt_MenuEntity
+            rt_Item -> rt_TextEntity [arrowhead = odiamond headlabel = "0..n"]
+            rt_ShipInteraction -> rt_Interaction
+            rt_ShipEntity -> rt_GameEntity
+            rt_Item -> rt_ShipEntity [arrowhead = diamond]
+            rt_ShipInteraction -> rt_ShipEntity [arrowhead = diamond]
+            rt_ForceAttachInteraction -> rt_ShipEntity [arrowhead = diamond]
+            rt_ForceControlInteraction -> rt_ShipEntity [arrowhead = diamond]
+            rt_ForceFireInteraction -> rt_ShipEntity [arrowhead = diamond]
+            rt_ShieldInteraction -> rt_Interaction
+            rt_PlayerEntity -> rt_GameEntity
+            rt_ShipEntity -> rt_PlayerEntity [arrowhead = diamond]
+            rt_MonsterInteraction -> rt_Interaction
+            rt_MonsterGeneratorEntity -> rt_GameEntity
+            rt_MonsterEntity -> rt_GameEntity
+            rt_Item -> rt_MonsterEntity [arrowhead = diamond]
+            rt_MonsterInteraction -> rt_MonsterEntity [arrowhead = diamond]
+            rt_GameEntity -> rt_Interaction [arrowhead = odiamond]
+            rt_MenuPlayer -> gc_Player
+            rt_MainGame -> rt_MenuPlayer [arrowhead = diamond]
+            rt_MainMenuEntity -> rt_MenuPlayer [arrowhead = diamond]
+            rt_MenuEntity -> gc_Entity
+            rt_MainGame -> rt_MenuEntity [arrowhead = diamond]
+            rt_MapEntity -> rt_GameEntity
+            rt_MainMenuEntity -> rt_MenuEntity
+            rt_Item -> rt_MainMenuEntity [arrowhead = diamond]
+            rt_ButtonEntity -> rt_MainMenuEntity [arrowhead = diamond]
+            rt_MainGame -> gc_BasicGame
+            rt_Game -> rt_MainGame [arrowhead = odiamond headlabel = "0..n"]
+            rt_MenuPlayer -> rt_MainGame [arrowhead = odiamond headlabel = "0..n"]
+            rt_LittleRobotMobEntity -> rt_MonsterEntity
+            rt_GarbageSpawnerEntity -> rt_GameEntity
+            rt_WallInteraction -> rt_GarbageSpawnerEntity [arrowhead = diamond]
+            rt_TriggerInteraction -> rt_GarbageSpawnerEntity [arrowhead = diamond]
+            rt_GarbageEntity -> rt_GameEntity
+            rt_Item -> rt_GarbageEntity [arrowhead = diamond]
+            rt_WallInteraction -> rt_GarbageEntity [arrowhead = diamond]
+            rt_GamePlayer -> gc_Player
+            rt_Game -> rt_GamePlayer [arrowhead = diamond]
+            rt_PlayerEntity -> rt_GamePlayer [arrowhead = diamond]
+            rt_Game -> gc_BasicGame
+            rt_MainGame -> rt_Game [arrowhead = diamond]
+            rt_MapEntity -> rt_Game [arrowhead = diamond]
+            rt_GamePlayer -> rt_Game [arrowhead = odiamond headlabel = "0..n"]
+            rt_GameEntity -> gc_Entity
+            rt_Game -> rt_GameEntity [arrowhead = diamond]
+            rt_FriendlyDamageInteraction -> rt_ADamageInteraction
+            rt_FriendlyBulletEntity -> rt_BulletEntity
+            rt_FriendlyDamageInteraction -> rt_FriendlyBulletEntity [arrowhead = diamond]
+            rt_ForceFireInteraction -> rt_Interaction
+            rt_ForceEntity -> rt_GameEntity
+            rt_FriendlyDamageInteraction -> rt_ForceEntity [arrowhead = diamond]
+            rt_ShieldInteraction -> rt_ForceEntity [arrowhead = diamond]
+            rt_ForceControlInteraction -> rt_Interaction
+            rt_ForceAttachInteraction -> rt_Interaction
+            rt_EnemyDamageInteraction -> rt_ADamageInteraction
+            rt_EnemyBulletEntity -> rt_BulletEntity
+            rt_EnemyDamageInteraction -> rt_EnemyBulletEntity [arrowhead = diamond]
+            rt_EnduranceMap1Entity -> rt_MapEntity
+            rt_WallGeneratorEntity -> rt_EnduranceMap1Entity [arrowhead = diamond]
+            rt_MonsterGeneratorEntity -> rt_EnduranceMap1Entity [arrowhead = odiamond headlabel = "0..n"]
+            rt_ButtonEntity -> rt_MenuEntity
+            rt_TextEntity -> rt_ButtonEntity [arrowhead = diamond]
+            rt_BulletEntity -> rt_GameEntity
+            rt_Item -> rt_BulletEntity [arrowhead = diamond]
+            rt_BonusInteraction -> rt_Interaction
+            rt_BackgroundEntity -> rt_GameEntity
+            rt_Item -> rt_BackgroundEntity [arrowhead = diamond headlabel = "0..n"]
+            rt_ADamageInteraction -> rt_Interaction
+        } //rtype
+    } //games
+} //all
+
+
+/*
+Trucs utiles:
+- heritage: parent -> child
+- membre: child -> parent [arrowhead = diamond]
+- agregation: child -> parent [arrowhead = odiamond]
+- invisible:
+    parent -> child
+    [
+        style = invisible
+        arrowhead = none
+    ]
+*/

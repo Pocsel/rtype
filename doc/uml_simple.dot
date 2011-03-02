@@ -1,0 +1,2146 @@
+digraph ta_soeur_en_claquettes
+{
+    fontname = "Bitstream sans Vera"
+    compound = true;
+    ranksep = 1.25;
+    rankdir = BT;
+    label = "Generic Multiplayer Gaming P";
+    fontsize = 24;
+
+    node
+    [
+        fontname = "Monaco"
+        fontsize = 8
+        shape = "record"
+        style = filled
+        fillcolor = white
+    ]
+
+    edge
+    [
+        fontname = "Monaco"
+        fontsize = 8
+    ]
+
+
+/* Common */
+    subgraph cluster_Common
+    {
+        label = "Common"
+        fontsize = 24;
+
+        cm_Packet
+        [
+    label="{\
+Packet\
+|\
+- _data: char*\l\
+- _size: size_t\l\
+- _allocSize: size_t\l\
+- _offset: mutable size_t\l\
+|\
++ Packet()\l\
++ Packet(packet: Packet const&)\l\
++ ~Packet()\l\
+- _WriteSize(): void\l\
+- _WriteByte(byte: char): void\l\
+- _Resize(target: size_t): void\l\
++ operator =(packet: Packet const&): Packet&\l\
++ BytesLeft() const: size_t\l\
++ Clear(): void\l\
++ WriteData(data: char*, size: size_t): void\l\
++ Write8(val: uint8_t): void\l\
++ Write16(val: uint16_t): void\l\
++ Write32(val: uint32_t): void\l\
++ WriteFloat(val: float): void\l\
++ WriteString(val: String const&): void\l\
++ Read8() const: uint8_t\l\
++ Read16() const: uint16_t\l\
++ Read32() const: uint32_t\l\
++ ReadFloat() const: float\l\
++ ReadString() const: String\l\
++ GetSize() const: size_t\l\
++ GetCompleteSize() const: size_t\l\
++ GetData() const: char const*\l\
++ GetCompleteData() const: char const*\l\
++ Dump() const: void\l\
+}"
+        ]
+
+        cm_String
+        [
+    label="{\
+String\
+|\
+- \<\<static\>\> _whitespaces: std::string const\l\
+|\
++ String()\l\
++ String(str: std::string const&)\l\
++ String(str: char const*)\l\
++ String(s: String const&)\l\
++ String(val: T const&): template\<typename T\>\l\
++ operator \>\>(val: T&): template\<typename T\> String&\l\
++ operator +(val: T const&) const: template\<typename T\> String\l\
++ operator +=(val: T const&): template\<typename T\> String&\l\
++ ltrim(whitespaces: std::string const&): void\l\
+}"
+        ]
+
+        cm_Log
+        [
+    label="{\
+Log\
+|\
+|\
++ \<\<static\>\> D(message: String const&): void\l\
++ \<\<static\>\> I(message: String const&): void\l\
++ \<\<static\>\> W(message: String const&): void\l\
++ \<\<static\>\> E(message: String const&): void\l\
+}"
+        ]
+
+        cm_Singleton
+        [
+            label = "Singleton"
+        ]
+
+    }
+
+/* Server */
+    subgraph cluster_Server
+    {
+        label = "Server"
+        fontsize = 24;
+
+subgraph cluster_Server2
+{
+/* Network */
+        subgraph cluster_Network
+        {
+            label = "Network"
+            fontsize = 16
+
+            sv_HostAddress
+            [
+    label="{\
+HostAddress\
+|\
+- _ip: uint32_t\l\
+- _port: uint16_t\l\
+|\
++ HostAddress()\l\
++ HostAddress(port: uint16_t, ip: uint32_t)\l\
++ HostAddress(tcpSocket: ITcpSocket const&, port: uint16_t)\l\
++ SetIp(ip: uint32_t): void\l\
++ SetPort(port: uint16_t): void\l\
++ GetIp() const: uint32_t\l\
++ GetPort() const: uint16_t\l\
++ \<\<static\>\> GetUdpPort(udpSocket: IUdpSocket const&): uint16_t\l\
++ Dump() const: void\l\
++ operator ==(other: HostAddress const&) const: bool\l\
++ operator \<(other: HostAddress const&) const: bool\l\
++ operator \>(other: HostAddress const&) const: bool\l\
+}"
+            ]
+
+            sv_IService
+            [
+    label="{\
+IService\
+|\
+|\
++ \<\<virtual\>\> ~IService()\l\
++ \<\<abstract\>\> RegisterAcceptor(socket: ITcpSocket&, handler: AcceptHandler const&): void\l\
++ \<\<abstract\>\> RegisterTcpSocket(socket: ITcpSocket&, handler: DataHandler const&): TcpSocketProxy&\l\
++ \<\<abstract\>\> RegisterUdpSocket(socket: IUdpSocket&, handler: DataHandler const&): IUdpSocketProxy&\l\
++ \<\<abstract\>\> RegisterTimer(milliseconds: uint32_t, handler: TimerHandler const&): uint32_t\l\
++ \<\<abstract\>\> UnregisterAcceptor(socket: ITcpSocket const&): void\l\
++ \<\<abstract\>\> UnregisterTcpSocket(socket: ITcpSocket const&): void\l\
++ \<\<abstract\>\> UnregisterUdpSocket(socket: IUdpSocket const&): void\l\
++ \<\<abstract\>\> UnregisterTimer(timerId: uint32_t): void\l\
++ \<\<abstract\>\> Stop(): void\l\
++ \<\<abstract\>\> Run(): void\l\
+}"
+                ]
+
+                sv_Service
+                [
+    label="{\
+Service\
+|\
+- _acceptors: std::map\<ITcpSocket*, AcceptHandler\>\l\
+- _tcpSockets: std::map\<TcpSocketProxy*, DataHandler\>\l\
+- _udpSockets: std::map\<IUdpSocketProxy*, DataHandler\>\l\
+- _timers: std::map\<uint32_t, Timer\>\l\
+- _nextTimerId: uint32_t\l\
+- _running: bool\l\
+- _readFdset: fd_set\l\
+- _writeFdset: fd_set\l\
+- _maxFd: SocketFD\l\
+- _timeOut: struct timeval\l\
+- _removedAcceptors: std::list\<ITcpSocket*\>\l\
+- _removedTcpSockets: std::list\<ITcpSocket*\>\l\
+- _removedUdpSockets: std::list\<IUdpSocket*\>\l\
+- _removedTimers: std::list\<uint32_t\>\l\
+- _rdBuff: char*\l\
+|\
++ Service()\l\
++ ~Service()\l\
+- _InitFdsets(): void\l\
+- _InitTimeOut(): void\l\
+- _Select(): void\l\
+- _ExecSockets(): void\l\
+- _ExecAcceptor(acceptor: std::map\<ITcpSocket*, AcceptHandler\>::iterator&): void\l\
+- _ExecTcpSocket(socket: std::map\<TcpSocketProxy*, DataHandler\>::iterator&): void\l\
+- _ExecUdpSocket(socket: std::map\<IUdpSocketProxy*, DataHandler\>::iterator&): void\l\
+- _ExecTimers(): void\l\
+- _CleanMaps(): void\l\
++ \<\<virtual\>\> RegisterAcceptor(socket: ITcpSocket&, handler: AcceptHandler const&): void\l\
++ \<\<virtual\>\> RegisterTcpSocket(socket: ITcpSocket&, handler: DataHandler const&): TcpSocketProxy&\l\
++ \<\<virtual\>\> RegisterUdpSocket(socket: IUdpSocket&, handler: DataHandler const&): IUdpSocketProxy&\l\
++ \<\<virtual\>\> RegisterTimer(milliseconds: uint32_t, handler: TimerHandler const&): uint32_t\l\
++ \<\<virtual\>\> UnregisterAcceptor(socket: ITcpSocket const&): void\l\
++ \<\<virtual\>\> UnregisterTcpSocket(socket: ITcpSocket const&): void\l\
++ \<\<virtual\>\> UnregisterUdpSocket(socket: IUdpSocket const&): void\l\
++ \<\<virtual\>\> UnregisterTimer(timerId: uint32_t): void\l\
++ \<\<virtual\>\> Stop(): void\l\
++ \<\<virtual\>\> Run(): void\l\
+}"
+                ]
+
+                sv_ITcpSocket
+                [
+    label="{\
+ITcpSocket\
+|\
+|\
++ \<\<virtual\>\> ~ITcpSocket()\l\
++ \<\<abstract\>\> Send(data: char const*, len: size_t): ssize_t\l\
++ \<\<abstract\>\> Recv(buf: char*, len: size_t): ssize_t\l\
++ \<\<abstract\>\> Accept(): ITcpSocket*\l\
++ \<\<abstract\>\> GetSocketFD() const: SocketFD\l\
+}"
+                ]
+
+                sv_IUdpSocket
+                [
+    label="{\
+IUdpSocket\
+|\
+|\
++ \<\<virtual\>\> ~IUdpSocket()\l\
++ \<\<abstract\>\> WriteDatagram(address: HostAddress const&, data: char const*, len: size_t): ssize_t\l\
++ \<\<abstract\>\> ReadDatagram(buf: char*, len: size_t): ssize_t\l\
++ \<\<abstract\>\> GetSocketFD() const: SocketFD\l\
+}"
+                ]
+
+                sv_TcpSocketProxy
+                [
+    label="{\
+TcpSocketProxy\
+|\
+- _socket: ITcpSocket&\l\
+- _buff: std::list\<SendBuffer\>\l\
+- _writeHandler: WriteHandler\l\
+- _writeHandling: bool\l\
+|\
++ TcpSocketProxy(socket: ITcpSocket&)\l\
++ ~TcpSocketProxy()\l\
++ Send(packet: Packet const&): void\l\
++ HasSomethingToSend() const: bool\l\
++ SendOnNetwork(): ssize_t\l\
++ GetSocket(): ITcpSocket&\l\
++ ActivateWriteHandling(handler: WriteHandler const&): void\l\
++ DeactivateWriteHandling(): void\l\
+}"
+                ]
+
+                sv_IUdpSocketProxy
+                [
+    label="{\
+IUdpSocketProxy\
+|\
+|\
++ \<\<virtual\>\> ~IUdpSocketProxy()\l\
++ \<\<abstract\>\> Send(address: HostAddress const&, packet: Packet const&): void\l\
++ \<\<abstract\>\> HasSomethingToSend() const: bool\l\
++ \<\<abstract\>\> SendOnNetwork(): void\l\
++ \<\<abstract\>\> GetSocket(): IUdpSocket&\l\
+}"
+                ]
+
+                sv_UdpSocketProxy
+                [
+    label="{\
+UdpSocketProxy\
+|\
+- _socket: IUdpSocket&\l\
+- _buff: std::map\<HostAddress, std::queue\<SendBuffer\>\>\l\
+|\
++ UdpSocketProxy(socket: IUdpSocket&)\l\
++ \<\<virtual\>\> Send(address: HostAddress const&, packet: Packet const&): void\l\
++ \<\<virtual\>\> HasSomethingToSend() const: bool\l\
++ \<\<virtual\>\> SendOnNetwork(): void\l\
++ \<\<virtual\>\> GetSocket(): IUdpSocket&\l\
+}"
+                ]
+
+                {rank=same ; sv_UdpSocketProxy ; sv_TcpSocketProxy}
+
+                subgraph cluster_TcpSocket
+                {
+                    label = "typedef TcpSocket"
+                    fontsize = 16
+
+                    sv_UnixTcpSocket
+                    [
+    label="{\
+UnixTcpSocket\
+|\
+- _socket: SocketFD\l\
+- _acceptor: bool\l\
+|\
++ UnixTcpSocket(address: HostAddress const&)\l\
++ UnixTcpSocket(socket: SocketFD)\l\
++ ~UnixTcpSocket()\l\
++ \<\<virtual\>\> Send(data: char const*, len: size_t): ssize_t\l\
++ \<\<virtual\>\> Recv(buf: char*, len: size_t): ssize_t\l\
++ \<\<virtual\>\> Accept(): ITcpSocket*\l\
++ \<\<virtual\>\> GetSocketFD() const: SocketFD\l\
+}"
+                    ]
+
+                    sv_WindowsTcpSocket
+                    [
+    label="{\
+WindowsTcpSocket\
+|\
+- _socket: SocketFD\l\
+- _acceptor: bool\l\
+|\
++ WindowsTcpSocket(address: HostAddress const&)\l\
++ WindowsTcpSocket(socket: SocketFD)\l\
++ ~WindowsTcpSocket()\l\
++ \<\<virtual\>\> Send(data: char const*, len: size_t): ssize_t\l\
++ \<\<virtual\>\> Recv(buf: char*, len: size_t): ssize_t\l\
++ \<\<virtual\>\> Accept(): ITcpSocket*\l\
++ \<\<virtual\>\> GetSocketFD() const: SocketFD\l\
+}"
+                    ]
+                } //tcp socket
+
+                subgraph cluster_UdpSocket
+                {
+                    label = "typedef UdpSocket"
+                    fontsize = 16
+
+
+                    sv_UnixUdpSocket
+                    [
+    label="{\
+UnixUdpSocket\
+|\
+- _socket: SocketFD\l\
+|\
++ UnixUdpSocket(address: HostAddress const&)\l\
++ UnixUdpSocket(socket: SocketFD)\l\
++ ~UnixUdpSocket()\l\
++ \<\<virtual\>\> WriteDatagram(address: HostAddress const&, data: char const*, len: size_t): ssize_t\l\
++ \<\<virtual\>\> ReadDatagram(buf: char*, len: size_t): ssize_t\l\
++ \<\<virtual\>\> GetSocketFD() const: SocketFD\l\
+}"
+                    ]
+
+                    sv_WindowsUdpSocket
+                    [
+    label="{\
+WindowsUdpSocket\
+|\
+- _socket: SocketFD\l\
+|\
++ WindowsUdpSocket(address: HostAddress const&)\l\
++ WindowsUdpSocket(socket: SocketFD)\l\
++ ~WindowsUdpSocket()\l\
++ \<\<virtual\>\> WriteDatagram(address: HostAddress const&, data: char const*, len: size_t): ssize_t\l\
++ \<\<virtual\>\> ReadDatagram(buf: char*, len: size_t): ssize_t\l\
++ \<\<virtual\>\> GetSocketFD() const: SocketFD\l\
+}"
+                    ]
+
+                } //udp socket
+                sv_UnixTcpSocket -> sv_ITcpSocket
+                sv_WindowsTcpSocket -> sv_ITcpSocket
+                sv_UnixUdpSocket -> sv_IUdpSocket
+                sv_WindowsUdpSocket -> sv_IUdpSocket
+                sv_UdpSocketProxy -> sv_IUdpSocketProxy
+                sv_IUdpSocket -> sv_UdpSocketProxy [arrowhead = diamond]
+                sv_IUdpSocketProxy -> sv_Service [arrowhead = odiamond]
+                sv_TcpSocketProxy -> sv_Service [arrowhead = odiamond]
+                sv_ITcpSocket -> sv_TcpSocketProxy [arrowhead = diamond]
+                sv_IUdpSocket -> sv_Service [arrowhead = odiamond headlabel="0..n"]
+                sv_ITcpSocket -> sv_Service [arrowhead = odiamond headlabel="0..n"]
+                sv_Service -> sv_IService
+            } //network
+
+subgraph cluster_Threads
+{
+    label = "Threads"
+
+      IThread [
+    label="{\
+IThread\
+|\
+|\
++ \<\<virtual\>\> ~IThread()\l\
++ \<\<abstract\>\> Quit(): void\l\
++ \<\<abstract\>\> Join(): void\l\
+}"
+    ]
+
+     Thread [
+        label = "{\
+Thread\
+|\
+- _thread: Thread_t*\l\
+- _joined: bool\l\
+- _functor: FUNCTOR\l\
+- _Run(IThreadObject*): void*\l\
+|\
++ Thread(functor: FUNCTOR const&)\l\
++ ~Thread(void)\l\
++ Quit(void): void\l\
++ Join(void): void\l\
+}"
+    ]
+
+      IMutex [
+    label="{\
+IMutex\
+|\
+|\
++ \<\<virtual\>\> ~IMutex()\l\
++ \<\<abstract\>\> Lock(): void\l\
++ \<\<abstract\>\> TryLock(): bool\l\
++ \<\<abstract\>\> UnLock(): void\l\
+}"
+    ]
+
+      Mutex [
+    label="{\
+Mutex\
+|\
+- _mutex: Mutex_t*\l\
+- _locked: bool\l\
+|\
++ Mutex()\l\
++ ~Mutex()\l\
++ Lock(): void\l\
++ TryLock(): bool\l\
++ UnLock(): void\l\
+}"
+    ]
+
+    ScopeLock
+[
+    label="{\
+ScopeLock\
+|\
+- _mutex: IMutex&\l\
+|\
++ ScopeLock(mutex: IMutex&)\l\
++ ~ScopeLock()\l\
+}"
+]
+IMutex -> ScopeLock [arrowhead = diamond]
+    Mutex -> IMutex
+    Thread -> IThread
+
+}
+
+/* Common */
+        subgraph cluster_ServerGameAPI
+        {
+            label = "Game DLL API"
+            fontsize = 16
+
+/* Games */
+            sc_IGame
+            [
+    label="{\
+IGame\
+|\
+|\
++ \<\<virtual\>\> ~IGame()\l\
++ \<\<abstract\>\> GetName() const: String const&\l\
++ \<\<abstract\>\> Initialize(serverProxy: IServerProxy&): bool\l\
++ \<\<abstract\>\> AddPlayer(playerId: uint16_t, nick: String const&, address: HostAddress const&): void\l\
++ \<\<abstract\>\> RemovePlayer(playerId: uint16_t): void\l\
++ \<\<abstract\>\> Run(): void\l\
++ \<\<abstract\>\> Stop(): void\l\
+}"
+            ]
+
+            sc_IServerProxy
+            [
+    label="{\
+IServerProxy\
+|\
+|\
++ \<\<virtual\>\> ~IServerProxy()\l\
++ \<\<abstract\>\> GetService() const: IService*\l\
++ \<\<abstract\>\> SendTcpPacket(targetId: uint16_t, packet: Packet const&): void\l\
++ \<\<abstract\>\> GetUdpSocket(): IUdpSocket*\l\
++ \<\<abstract\>\> ReleaseUdpSocket(socket: IUdpSocket&): void\l\
++ \<\<abstract\>\> RegisterResource(infos: AResourceInfo&): void\l\
++ \<\<abstract\>\> GetGameList(): std::map\<uint16_t, String\> const&\l\
++ \<\<abstract\>\> SetClientGame(clientId: uint16_t, gameId: uint16_t): void\l\
+}"
+            ]
+
+            sc_AResourceInfo
+            [
+    label="{\
+AResourceInfo\
+|\
+- _path: String\l\
+- _id: uint16_t\l\
+|\
++ AResourceInfo()\l\
++ \<\<virtual\>\> ~AResourceInfo()\l\
++ GetPath() const: String const&\l\
++ SetPath(path: String const&): void\l\
++ GetId() const: uint16_t\l\
++ SetId(id: uint16_t): void\l\
++ \<\<abstract\>\> FillPacket(packet: Packet&) const: void\l\
++ \<\<abstract\>\> Clone() const: AResourceInfo*\l\
+}"
+            ]
+        } // game API
+
+/* Base */
+        subgraph cluster_ServerLogic
+        {
+            label = "Server Base"
+            fontsize = 16
+
+            sv_DLHandler
+            [
+    label="{\
+DLHandler\
+|\
+- _dl: DLHandle\l\
+|\
++ DLHandler(filename: String const&)\l\
++ ~DLHandler()\l\
++ GetDLSym(symname: String const&): DLSym\l\
+}"
+            ]
+
+            sv_Server
+            [
+    label="{\
+Server\
+|\
+- _gamesPath: String\l\
+- _serverProxy: IServerProxy*\l\
+- _service: IService*\l\
+- _acceptor: ITcpSocket*\l\
+- _pingTimerId: uint32_t\l\
+- _libs: std::vector\<DLHandler*\>\l\
+- _resources: std::map\<uint16_t, AResourceInfo*\>\l\
+- _nextResourceId: uint16_t\l\
+- _clients: std::map\<uint16_t, Client*\>\l\
+- _nextClientId: uint16_t\l\
+- _games: std::map\<uint16_t, IGame*\>\l\
+- _nextGameId: uint16_t\l\
+- _firstGameId: uint16_t\l\
+- _gameThreads: std::vector\<IThread*\>\l\
+- _nextUdpPort: uint16_t\l\
+- _udpSockets: std::list\<IUdpSocket*\>\l\
+- _gameList: std::map\<uint16_t, String\>\l\
+- _gameListInit: bool\l\
+|\
++ Server(gamesPath: String const&, udpPort: uint16_t, port: uint16_t, address: uint32_t)\l\
++ ~Server()\l\
+- _LoadGames(): void\l\
+- _RunGames(): void\l\
+- _AcceptHandler(errorId: int, nuSocket: ITcpSocket*): bool\l\
+- _PingHandler(timerId: uint32_t): bool\l\
++ Run(): void\l\
++ Stop(): void\l\
++ GetService() const: IService*\l\
++ SendTcpPacket(targetId: uint16_t, packet: Packet const&): void\l\
++ GetGameList(): std::map\<uint16_t, String\> const&\l\
++ SetClientGame(clientId: uint16_t, gameId: uint16_t): void\l\
++ GetUdpSocket(): IUdpSocket*\l\
++ ReleaseUdpSocket(socket: IUdpSocket&): void\l\
++ RegisterResource(infos: AResourceInfo&): void\l\
++ GetFile(resourceId: uint16_t, size: size_t&): std::ifstream*\l\
++ GetResources() const: std::map\<uint16_t, AResourceInfo*\> const&\l\
++ RemoveClient(id: uint16_t): void\l\
++ PutClientIngame(client: Client*): void\l\
+}"
+            ]
+
+            sv_Client
+            [
+    label="{\
+Client\
+|\
+- _handlers: std::map\<uint8_t, bool (Client::*)(Packet&)\>\l\
+- _id: uint16_t\l\
+- _udpPort: uint16_t\l\
+- _nick: String\l\
+- _packetCreator: PacketCreator\l\
+- _curGame: IGame*\l\
+- _socket: ITcpSocket*\l\
+- _socketProxy: TcpSocketProxy*\l\
+- _server: Server&\l\
+- _socketMutex: Mutex\l\
+- _state: State\l\
+- _didPong: bool\l\
+- _fileQueue: std::queue\<uint16_t\>\l\
+- _file: std::ifstream*\l\
+- _sendingFile: bool\l\
+|\
++ Client(socket: ITcpSocket*, service: IService*, server: Server&, id: uint16_t)\l\
++ ~Client()\l\
+- _ReadHandler(errorCode: int, data: char*, len: size_t): bool\l\
+- _ParsePacket(packet: Packet&): bool\l\
+- _AnyoneThereHandler(packet: Packet&): bool\l\
+- _INeedThisHandler(packet: Packet&): bool\l\
+- _LetsGoHandler(packet: Packet&): bool\l\
+- _PingHandler(packet: Packet&): bool\l\
+- _PongHandler(packet: Packet&): bool\l\
+- _WriteFile(): bool\l\
++ GetId() const: uint16_t\l\
++ GetNick() const: String const&\l\
++ GetUdpPort() const: uint16_t\l\
++ GetSocket(): ITcpSocket&\l\
++ SendTcpPacket(packet: Packet const&): void\l\
++ SetGame(game: IGame*): void\l\
++ GetGame(): IGame*\l\
++ DidPong() const: bool\l\
++ Ping(): void\l\
+}"
+            ]
+
+            sv_PacketCreator
+            [
+    label="{\
+PacketCreator\
+|\
+- _rawData: char*\l\
+- _rawDataSize: size_t\l\
+|\
++ PacketCreator()\l\
++ ~PacketCreator()\l\
++ PushRawData(data: char*, size: size_t): void\l\
++ GetPacket(): Packet*\l\
++ CreatePing(packet: Packet&): void\l\
++ CreatePong(packet: Packet&, ping: Packet&): void\l\
++ CreatePleaseComeIn(packet: Packet&, id: uint16_t, itemsCount: uint16_t): void\l\
++ CreateTakeThis(packet: Packet&, fileId: uint16_t, size: size_t): void\l\
+}"
+            ]
+
+    /* Games */
+            sv_ServerProxy
+            [
+    label="{\
+ServerProxy\
+|\
+- _server: Server&\l\
+- _udpSocketsMutex: Mutex\l\
+|\
++ ServerProxy(server: Server&)\l\
++ ~ServerProxy()\l\
++ \<\<virtual\>\> GetService() const: IService*\l\
++ \<\<virtual\>\> SendTcpPacket(targetId: uint16_t, packet: Packet const&): void\l\
++ \<\<virtual\>\> GetUdpSocket(): IUdpSocket*\l\
++ \<\<virtual\>\> ReleaseUdpSocket(socket: IUdpSocket&): void\l\
++ \<\<virtual\>\> RegisterResource(infos: AResourceInfo&): void\l\
++ \<\<virtual\>\> GetGameList(): std::map\<uint16_t, String\> const&\l\
++ \<\<virtual\>\> SetClientGame(clientId: uint16_t, gameId: uint16_t): void\l\
+}"
+            ]
+            IMutex -> sv_ServerProxy [arrowhead = diamond]
+            IMutex -> sv_Client [arrowhead = diamond]
+            sv_ServerProxy -> sc_IServerProxy
+            sv_ServerProxy -> sv_Server [arrowhead = diamond]
+            sv_Server -> sv_ServerProxy [arrowhead = diamond]
+            sv_PacketCreator -> sv_Client [arrowhead = diamond]
+            sv_TcpSocketProxy -> sv_Client [arrowhead = diamond]
+            sc_IServerProxy -> sv_Server [arrowhead = diamond]
+            sv_IService -> sv_Server [arrowhead = diamond]
+            sv_DLHandler -> sv_Server [arrowhead = odiamond headlabel = "0..n"]
+            sc_AResourceInfo -> sv_Server [arrowhead = odiamond headlabel = "0..n"]
+            sv_Client -> sv_Server [arrowhead = odiamond headlabel = "0..n"]
+            sc_IGame -> sv_Server [arrowhead = odiamond headlabel = "0..n"]
+            IThread -> sv_Server [arrowhead = odiamond headlabel = "0..n"]
+        } //logic
+
+} //server 2
+
+        subgraph cluster_Games
+        {
+            label = "Games"
+            fontsize = 16
+
+            subgraph cluster_GamesCommon
+            {
+                label = "Games Common Classes"
+                fontsize = 16
+
+                subgraph cluster_Math
+                {
+                    label = "Math System"
+                    fontsize = 13
+
+                    gc_Shape
+                    [
+    label="{\
+Shape\
+|\
+|\
++ \<\<virtual\>\> ~Shape()\l\
++ \<\<abstract\>\> operator ==(shape: Shape const&) const: bool\l\
++ \<\<virtual\>\> operator ==(shape: Circle const&) const: bool\l\
++ \<\<virtual\>\> operator ==(shape: Point const&) const: bool\l\
++ \<\<virtual\>\> operator ==(shape: Rect const&) const: bool\l\
++ \<\<abstract\>\> operator !=(shape: Shape const&) const: bool\l\
++ \<\<virtual\>\> operator !=(shape: Circle const&) const: bool\l\
++ \<\<virtual\>\> operator !=(shape: Point const&) const: bool\l\
++ \<\<virtual\>\> operator !=(shape: Rect const&) const: bool\l\
++ \<\<abstract\>\> Intersect(shape: Shape const&) const: bool\l\
++ \<\<abstract\>\> Intersect(shape: Circle const&) const: bool\l\
++ \<\<abstract\>\> Intersect(shape: Point const&) const: bool\l\
++ \<\<abstract\>\> Intersect(shape: Rect const&) const: bool\l\
++ \<\<abstract\>\> Clone() const: Shape*\l\
+}"
+                    ]
+
+                    gc_Point
+                    [
+    label="{\
+Point\
+|\
+- _x: float\l\
+- _y: float\l\
+|\
++ Point()\l\
++ Point(x: float, y: float)\l\
++ ~Point()\l\
++ GetX() const: float\l\
++ GetY() const: float\l\
++ SetX(value: float): void\l\
++ SetY(value: float): void\l\
++ GetSquaredDistance(pt: Point const&) const: float\l\
++ GetDistance(pt: Point const&) const: float\l\
++ operator +(pt: Point const&) const: Point\l\
++ operator +=(pt: Point const&): void\l\
++ operator -(pt: Point const&) const: Point\l\
++ operator -=(pt: Point const&): void\l\
++ \<\<virtual\>\> operator ==(shape: Shape const&) const: bool\l\
++ \<\<virtual\>\> operator ==(pt: Point const&) const: bool\l\
++ \<\<virtual\>\> operator !=(shape: Shape const&) const: bool\l\
++ \<\<virtual\>\> operator !=(pt: Point const&) const: bool\l\
++ \<\<virtual\>\> Intersect(shape: Shape const&) const: bool\l\
++ \<\<virtual\>\> Intersect(pt: Point const&) const: bool\l\
++ \<\<virtual\>\> Intersect(rect: Rect const&) const: bool\l\
++ \<\<virtual\>\> Intersect(circle: Circle const&) const: bool\l\
++ \<\<virtual\>\> Clone() const: Shape*\l\
+}"
+                    ]
+                    gc_Point -> gc_Shape
+
+                    gc_Rectangle
+                    [
+    label="{\
+Rect\
+|\
+- _position: Point\l\
+- _width: float\l\
+- _height: float\l\
+|\
++ Rect()\l\
++ Rect(x: float, y: float, w: float, h: float)\l\
++ Rect(pos: Point const&, w: float, h: float)\l\
++ Rect(p1: Point const&, p2: Point const&)\l\
++ ~Rect()\l\
++ GetX() const: float\l\
++ GetY() const: float\l\
++ GetPosition() const: Point const&\l\
++ GetWidth() const: float\l\
++ GetHeight() const: float\l\
++ SetPosition(x: float, y: float): void\l\
++ SetPosition(pt: Point const&): void\l\
++ SetWidth(value: float): void\l\
++ SetHeight(value: float): void\l\
++ GetTopLeft() const: Point\l\
++ GetTopRight() const: Point\l\
++ GetBottomLeft() const: Point\l\
++ GetBottomRight() const: Point\l\
++ GetCenter() const: Point\l\
++ \<\<virtual\>\> operator ==(shape: Shape const&) const: bool\l\
++ \<\<virtual\>\> operator ==(rect: Rect const&) const: bool\l\
++ \<\<virtual\>\> operator !=(shape: Shape const&) const: bool\l\
++ \<\<virtual\>\> operator !=(rect: Rect const&) const: bool\l\
++ \<\<virtual\>\> Intersect(shape: Shape const&) const: bool\l\
++ \<\<virtual\>\> Intersect(pt: Point const&) const: bool\l\
++ \<\<virtual\>\> Intersect(rect: Rect const&) const: bool\l\
++ \<\<virtual\>\> Intersect(circle: Circle const&) const: bool\l\
++ \<\<virtual\>\> Clone() const: Shape*\l\
+}"
+                    ]
+                    gc_Rectangle -> gc_Shape
+                    gc_Point -> gc_Rectangle [arrowhead = diamond]
+
+                    gc_Circle
+                    [
+    label="{\
+Circle\
+|\
+- _position: Point\l\
+- _radius: float\l\
+- _sqRadius: float\l\
+|\
++ Circle()\l\
++ Circle(x: float, y: float, radius: float)\l\
++ Circle(pos: Point const&, radius: float)\l\
++ ~Circle()\l\
++ GetX() const: float\l\
++ GetY() const: float\l\
++ GetPosition() const: Point const&\l\
++ GetRadius() const: float\l\
++ SetPosition(x: float, y: float): void\l\
++ SetPosition(pt: Point const&): void\l\
++ SetRadius(value: float): void\l\
++ \<\<virtual\>\> operator ==(shape: Shape const&) const: bool\l\
++ \<\<virtual\>\> operator ==(circle: Circle const&) const: bool\l\
++ \<\<virtual\>\> operator !=(shape: Shape const&) const: bool\l\
++ \<\<virtual\>\> operator !=(circle: Circle const&) const: bool\l\
++ \<\<virtual\>\> Intersect(shape: Shape const&) const: bool\l\
++ \<\<virtual\>\> Intersect(pt: Point const&) const: bool\l\
++ \<\<virtual\>\> Intersect(rect: Rect const&) const: bool\l\
++ \<\<virtual\>\> Intersect(circle: Circle const&) const: bool\l\
++ \<\<virtual\>\> Clone() const: Shape*\l\
+}"
+                    ]
+                    gc_Circle -> gc_Shape
+                    gc_Point -> gc_Circle [arrowhead = diamond]
+
+                {rank=same ; gc_Point ; gc_Circle}
+
+                }
+
+                subgraph cluster_InteractionSystem
+                {
+                    label = "Interaction System"
+                    fontsize = 13
+
+                    gc_InteractionManager
+                    [
+    label="{\
+InteractionManager\<T\>\
+|\
+- _readGrid: QuadTree\<T\>*\l\
+- _writeGrid: QuadTree\<T\>*\l\
+|\
++ InteractionManager(width: size_t, height: size_t, levels: size_t)\l\
++ ~InteractionManager()\l\
++ AddInteraction(interaction: b00st::SmartPtr\<AInteraction\<T\>\> const&, shape: Shape const&): void\l\
++ ClearInteractions(): void\l\
++ SwapBuffers(): void\l\
++ Interact(entity: T&, area: Shape const&): void\l\
+}"
+                    ]
+
+                    gc_QuadTree
+                    [
+    label="{\
+QuadTree\
+|\
+- _childs: QuadTree*[4]\l\
+- _interactions: std::list\<Interaction\>\l\
+- _area: Rect\l\
+|\
++ QuadTree(area: Rect const&, levels: size_t)\l\
++ ~QuadTree()\l\
+- _Interact(entity: Entity&, area: Shape const&, interactions: std::set\<AInteraction\<Entity\>*\>&): void\l\
++ AddInteraction(interaction: b00st::SmartPtr\<AInteraction\<Entity\>\> const&, shape: Shape const&): void\l\
++ ClearInteractions(): void\l\
++ Interact(entity: Entity&, area: Shape const&): void\l\
+}"
+                    ]
+                    gc_QuadTree -> gc_QuadTree [arrowhead = odiamond headlabel = "x4"]
+                    gc_QuadTree -> gc_InteractionManager [arrowhead = diamond]
+                    gc_Rectangle -> gc_QuadTree [arrowhead = diamond]
+
+                    gc_AInteraction
+                    [
+    label="{\
+AInteraction\
+|\
+- _creator: Entity*\l\
+|\
++ AInteraction(entity: Entity*)\l\
++ \<\<virtual\>\> ~AInteraction()\l\
++ \<\<abstract\>\> Interact(entity: Entity&): bool\l\
++ \<\<virtual\>\> ChangeCreator(entity: Entity*): void\l\
++ \<\<virtual\>\> GetCreator() const: Entity*\l\
+}"
+                    ]
+                    gc_AInteraction -> gc_QuadTree [arrowhead = odiamond]
+
+                }
+
+                subgraph cluster_ResourceSystem
+                {
+                    label = "Resources System"
+                    fontsize = 13
+
+                    gc_AnimationResourceInfo
+                    [
+    label="{\
+AnimationResourceInfo\
+|\
+- _frames: size_t\l\
+- _delay: size_t\l\
+- _isVertical: bool\l\
+|\
++ AnimationResourceInfo(path: String const&, frames: size_t, delay: size_t, isVertical: bool)\l\
++ ~AnimationResourceInfo()\l\
++ FillPacket(packet: Packet&) const: void\l\
++ Clone() const: AResourceInfo*\l\
+}"
+                    ]
+                    gc_AnimationResourceInfo -> sc_AResourceInfo
+
+                    gc_SoundResourceInfo
+                    [
+    label="{\
+SoundResourceInfo\
+|\
+- _isMusic: bool\l\
+|\
++ SoundResourceInfo(path: String const&, isMusic: bool)\l\
++ ~SoundResourceInfo()\l\
++ FillPacket(packet: Packet&) const: void\l\
++ Clone() const: AResourceInfo*\l\
+}"
+                    ]
+                    gc_SoundResourceInfo -> sc_AResourceInfo
+
+                    gc_ResourceManager
+                    [
+    label="{\
+ResourceManager\
+|\
+- _game: BasicGame\<Entity, Player\>&\l\
+- _resources: std::map\<int, AResourceInfo*\>\l\
+|\
++ ResourceManager(game: BasicGame\<Entity, Player\>&)\l\
++ ~ResourceManager()\l\
++ GetResources() const: std::map\<int, AResourceInfo*\> const&\l\
++ Load(): bool\l\
++ RegisterResource(localId: int, resourceInfo: AResourceInfo*): void\l\
++ GetResourceId(id: int): uint16_t\l\
++ CopyResources(resources: std::map\<int, AResourceInfo*\> const&): void\l\
+}"
+                    ]
+                    gc_AnimationResourceInfo -> gc_ResourceManager [arrowhead = odiamond]
+                    gc_SoundResourceInfo -> gc_ResourceManager [arrowhead = odiamond]
+
+                }
+
+                subgraph cluster_GameLogicSystem
+                {
+                    label = "Game Logic System"
+                    fontsize = 13
+
+                    gc_Entity
+                    [
+                        label = "{\
+Entity|\
++ \<\<virtual\>\> Interact(interaction: InteractionType&) const: bool\l\
+|\
+--MUST BE DEFINED IN EVERY GAME DLL--\l\
+}"
+                    ]
+
+                    gc_Player
+                    [
+                        label = "{\
+Player|\
+--MUST BE DEFINED IN EVERY GAME DLL--\l\
+(may simply be a BasicPlayer)\l\
+}"
+                    ]
+
+                    gc_BasicGame
+                    [
+    label="{\
+BasicGame\<Entity, Player\>\
+|\
+- _playerManager: PlayerManager\<Entity, Player\>*\l\
+- _entityManager: EntityManager\<Entity, Player\>*\l\
+- _resourceManager: ResourceManager\<Entity, Player\>*\l\
+- _itemManager: ItemManager\<Entity, Player\>*\l\
+- _name: String\l\
+- _frameDelay: unsigned int\l\
+- _width: unsigned int\l\
+- _height: unsigned int\l\
+- _initialized: bool\l\
+- _serverProxy: IServerProxy*\l\
+- _service: IService*\l\
+- _udpSocket: IUdpSocket*\l\
+- _socketProxy: IUdpSocketProxy*\l\
+- _clock: Clock\l\
+|\
++ BasicGame(name: String const&, frameDelay: unsigned int, width: unsigned int, height: unsigned int)\l\
++ ~BasicGame()\l\
+# \<\<virtual\>\> _PreRun(): void\l\
+# \<\<virtual\>\> _PostRun(): void\l\
+# \<\<virtual\>\> _InitializeResources(): void\l\
+# \<\<virtual\>\> _OnAddPlayer(id: uint16_t): void\l\
+# \<\<virtual\>\> _OnRemovePlayer(id: uint16_t): void\l\
+# _Tick(timerId: uint32_t): bool\l\
+# _UdpData(errorCode: int, data: char*, size: size_t): bool\l\
++ Run(): void\l\
++ Initialize(serverProxy: IServerProxy&): bool\l\
++ AddPlayer(playerId: uint16_t, nick: String const&, address: HostAddress const&): void\l\
++ RemovePlayer(playerId: uint16_t): void\l\
++ Stop(): void\l\
++ SendPacket(address: HostAddress const&, p: Packet const&): void\l\
++ GetServer(): IServerProxy&\l\
++ GetResourceManager(): ResourceManager\<Entity, Player\>&\l\
++ GetItemManager(): ItemManager\<Entity, Player\>&\l\
++ GetPlayerManager(): PlayerManager\<Entity, Player\>&\l\
++ GetEntityManager(): EntityManager\<Entity, Player\>&\l\
++ GetName() const: String const&\l\
++ GetElapsedTime(): float\l\
++ R() const: float\l\
+}"
+                    ]
+                    gc_InteractionManager -> gc_BasicGame [arrowhead = diamond]
+                    gc_ResourceManager -> gc_BasicGame [arrowhead = diamond]
+                    sc_IServerProxy -> gc_BasicGame [arrowhead = diamond]
+                    sv_IService -> gc_BasicGame [arrowhead = diamond]
+                    sv_IUdpSocketProxy -> gc_BasicGame [arrowhead = diamond]
+
+                    gc_Clock
+                    [
+    label="{\
+Clock\
+|\
+- _baseTime: Time\l\
+|\
++ Clock()\l\
++ Reset(): void\l\
++ GetElapsedTime() const: float\l\
+}"
+                    ]
+                    gc_Clock -> gc_BasicGame [arrowhead = diamond]
+
+                    gc_BasicPlayer
+                    [
+    label="{\
+BasicPlayer\
+|\
+- _id: uint16_t\l\
+- _nick: String\l\
+- _address: HostAddress\l\
+- _keys: int[MAX_KEYS]\l\
+- _keyClicks: int[MAX_KEYS]\l\
+- _keyReleases: int[MAX_KEYS]\l\
+- _buttons: int[MAX_BUTTONS]\l\
+- _buttonClicks: int[MAX_BUTTONS]\l\
+- _buttonReleases: int[MAX_BUTTONS]\l\
+- _mouseX: size_t\l\
+- _mouseY: size_t\l\
+- _disabled: bool\l\
+|\
++ BasicPlayer(id: uint16_t, nick: String const&, address: HostAddress const&)\l\
++ \<\<virtual\>\> ~BasicPlayer()\l\
++ GetId() const: uint16_t\l\
++ GetNick() const: String const&\l\
++ GetAddress() const: HostAddress const&\l\
++ EventOnPressedKey(key: int): void\l\
++ EventOnReleasedKey(key: int): void\l\
++ EventOnPressedButton(button: int, x: size_t, y: size_t): void\l\
++ EventOnReleasedButton(button: int, x: size_t, y: size_t): void\l\
++ ResetClicks(): void\l\
++ KeyPressed(key: Gmgp::Key::Key) const: bool\l\
++ KeyClicked(key: Gmgp::Key::Key) const: bool\l\
++ KeyReleased(key: Gmgp::Key::Key) const: bool\l\
++ ButtonPressed(button: Gmgp::Mouse::Mouse) const: bool\l\
++ ButtonClicked(button: Gmgp::Mouse::Mouse) const: bool\l\
++ ButtonReleased(button: Gmgp::Mouse::Mouse) const: bool\l\
++ GetMouseX() const: size_t\l\
++ GetMouseY() const: size_t\l\
++ DisableItems(enable: bool): void\l\
++ IsDisabled() const: bool\l\
+}"
+                    ]
+                    gc_Player -> gc_BasicPlayer
+
+                    gc_EntityManager
+                    [
+    label="{\
+EntityManager\<Entity, Player\>\
+|\
+- _game: BasicGame\<Entity, Player\>&\l\
+- _interactionManager: InteractionManager\<Entity\>\l\
+- _entities: std::list\<Entity*\>\l\
+- _registerPool: std::list\<Entity*\>\l\
+- _unregisterPool: std::list\<Entity*\>\l\
+|\
++ EntityManager(game: BasicGame\<Entity, Player\>&)\l\
++ ~EntityManager()\l\
+- _ProcessRegisterPool(): void\l\
+- _ProcessUnregisterPool(): void\l\
++ RegisterEntity(entity: Entity*): void\l\
++ UnregisterEntity(entity: Entity*): void\l\
++ IsInUnregisterPool(entity: Entity*): bool\l\
++ Run(time: float): void\l\
++ GetInteractionManager(): InteractionManager\<Entity\>&\l\
+}"
+                    ]
+                    gc_InteractionManager -> gc_EntityManager [arrowhead = diamond]
+                    gc_EntityManager -> gc_BasicGame [arrowhead = diamond]
+                    gc_Entity -> gc_EntityManager
+
+                    gc_Item
+                    [
+    label="{\
+Item\
+|\
+# _playerId: uint16_t\l\
+# _lastTime: float\l\
+# _mask: uint16_t\l\
+# _updated: bool\l\
+# _resourceId: uint32_t\l\
+# _posX: float\l\
+# _posY: float\l\
+# _speedX: float\l\
+# _speedY: float\l\
+# _accelX: float\l\
+# _accelY: float\l\
+# _lifeTimeMs: size_t\l\
+# _lifeTimeCycles: size_t\l\
+# _disapear: bool\l\
+# _posZ: size_t\l\
+# _blinking: size_t\l\
+# _cursor: bool\l\
+# _frame: size_t\l\
+|\
++ Item(spawnTime: float)\l\
++ ~Item()\l\
++ SetPlayerId(id: uint16_t): void\l\
++ GetPlayerId() const: uint16_t\l\
++ Run(time: float): void\l\
++ ResetParamMask(): void\l\
++ HasChanged() const: bool\l\
++ SetChanged(enable: bool): void\l\
++ GetParamMask() const: uint16_t\l\
++ SetResourceId(id: uint32_t): void\l\
++ GetResourceId() const: uint32_t\l\
++ SetPositionX(pos: float): void\l\
++ GetPositionX() const: float\l\
++ SetPositionY(pos: float): void\l\
++ GetPositionY() const: float\l\
++ SetSpeedX(speed: float): void\l\
++ GetSpeedX() const: float\l\
++ SetSpeedY(speed: float): void\l\
++ GetSpeedY() const: float\l\
++ SetAccelX(accel: float): void\l\
++ GetAccelX() const: float\l\
++ SetAccelY(accel: float): void\l\
++ GetAccelY() const: float\l\
++ SetLifeTimeMs(ms: size_t): void\l\
++ GetLifeTimeMs() const: size_t\l\
++ SetLifeTimeCycles(cycles: size_t): void\l\
++ GetLifeTimeCycles() const: size_t\l\
++ SetDisapear(enable: bool): void\l\
++ GetDisapear() const: bool\l\
++ SetPositionZ(pos: size_t): void\l\
++ GetPositionZ() const: size_t\l\
++ SetBlinking(freq: size_t): void\l\
++ GetBlinking() const: size_t\l\
++ SetCursor(enable: bool): void\l\
++ GetCursor() const: bool\l\
++ SetFrame(frame: size_t): void\l\
++ GetFrame() const: size_t\l\
+}"
+                    ]
+
+                    gc_ItemManager
+                    [
+    label="{\
+ItemManager\<Entity, Player\>\
+|\
+- _game: BasicGame\<Entity, Player\>&\l\
+- _buffers: std::map\<HostAddress, Packet*\>\l\
+- _itemId: uint32_t\l\
+- _items: std::map\<Item*, uint32_t\>\l\
+- _packet: Packet*\l\
+|\
++ ItemManager(game: BasicGame\<Entity, Player\>&)\l\
++ ~ItemManager()\l\
+- _AddItemToBuffers(item: Item*, id: uint32_t, deletion: bool): void\l\
+- _SendPackets(): void\l\
+- _GetPacketOfPlayer(playerId: uint16_t): Packet*\l\
++ SendItem(item: Item&): uint32_t\l\
++ Run(time: float): void\l\
++ RefreshPlayer(playerId: uint16_t): void\l\
++ RemoveAllItemsOfPlayer(playerId: uint16_t): void\l\
++ SendDeletionForItemsOfPlayer(playerId: uint16_t): void\l\
++ AddItem(item: Item*): bool\l\
++ RemoveItem(item: Item*, sendPacket: bool, updateItem: bool): bool\l\
++ GetNumberOfItems() const: size_t\l\
++ HasItem(item: Item*) const: bool\l\
+}"
+                    ]
+                    gc_Item -> gc_ItemManager [arrowhead = odiamond headlabel = "0..n"]
+                    gc_ItemManager -> gc_BasicGame [arrowhead = diamond]
+
+                    gc_PlayerManager
+                    [
+    label="{\
+PlayerManager\<Entity, Player\>\
+|\
+- _game: BasicGame\<Entity, Player\>&\l\
+- _players: std::map\<size_t, Player*\>\l\
+- _newPlayers: std::list\<PlayerMetadata*\>\l\
+- _removedPlayers: std::list\<size_t\>\l\
+- _mutex: mutable Mutex\l\
+|\
++ PlayerManager(game: BasicGame\<Entity, Player\>&)\l\
++ ~PlayerManager()\l\
++ FlushEvents(): void\l\
++ GetPlayerIdList() const: std::list\<uint16_t\>\l\
++ SendPacket(packet: Packet const&, id: uint16_t): bool\l\
++ AddPlayer(id: size_t, nick: String const&, address: HostAddress const&): void\l\
++ HasPlayer(id: size_t) const: bool\l\
++ RemovePlayer(id: size_t): void\l\
++ GetNumberOfPlayers() const: size_t\l\
++ GetPlayer(id: size_t): Player&\l\
+}"
+                    ]
+                    gc_BasicPlayer -> gc_PlayerManager [arrowhead = odiamond headlabel = "0..n"]
+                    gc_PlayerManager -> gc_BasicGame [arrowhead = diamond]
+
+                }
+
+            }
+
+subgraph cluster_ImplementationGame
+{
+
+        /* Main Menu DLL */
+            subgraph cluster_MainMenu
+            {
+                label = "Main Menu DLL"
+                fontsize = 16
+
+                mm_ButtonEntity
+                [
+    label="{\
+ButtonEntity\<Entity, Game\>\
+|\
+- _text: TextEntity\<Entity, Game\>*\l\
+- _x: float\l\
+- _y: float\l\
+- _z: uint8_t\l\
+- _width: size_t\l\
+- _hover: bool\l\
+- _clicked: bool\l\
+- _icon: Item\l\
+|\
++ ButtonEntity(game: Game&, playerId: uint16_t)\l\
++ ~ButtonEntity()\l\
+- _Hover(): bool\l\
++ Run(time: float): void\l\
++ SetPosition(x: float, y: float, z: uint8_t): void\l\
++ SetText(text: String const&): void\l\
++ Clicked() const: bool\l\
+}"
+                ]
+
+                mm_Entity
+                [
+    label="{\
+Entity\
+|\
+- _name: String\l\
+- _playerId: uint16_t\l\
+# _game: Game&\l\
+|\
++ Entity(game: Game&, name: String const&, playerId: uint16_t)\l\
++ \<\<virtual\>\> ~Entity()\l\
++ \<\<virtual\>\> GenerateInteractions(time: float): void\l\
++ \<\<virtual\>\> Run(time: float): void\l\
++ SetName(name: String const&): void\l\
++ GetName() const: String const&\l\
++ GetPlayerId() const: uint16_t\l\
++ SetPlayerId(playerId: uint16_t): void\l\
+}"
+                ]
+
+                mm_Game
+                [
+    label="{\
+Game\
+|\
+|\
++ Game()\l\
++ ~Game()\l\
+# \<\<virtual\>\> _InitializeResources(): void\l\
+}"
+                ]
+
+                mm_MenuEntity
+                [
+    label="{\
+MenuEntity\
+|\
+- _text: TextEntity\<Entity, Game\>*\l\
+- _buttons: std::map\<uint16_t, ButtonEntity*\>\l\
+- _bg: Item\l\
+- _cursor: Item\l\
+- _gameTarget: uint16_t\l\
+- _leaveTime: float\l\
+|\
++ MenuEntity(game: Game&, playerId: uint16_t, nick: String const&)\l\
++ ~MenuEntity()\l\
++ Run(time: float): void\l\
+}"
+                ]
+
+                mm_Player
+                [
+    label="{\
+Player\
+|\
+- _game: Game&\l\
+- _menu: MenuEntity*\l\
+|\
++ Player(id: uint16_t, nick: String const&, address: HostAddress const&, game: BasicGame\<Entity, Player\>&)\l\
++ ~Player()\l\
+}"
+                ]
+
+                mm_TextEntity
+                [
+    label="{\
+TextEntity\
+|\
+- _text: String\l\
+- _resourceId: uint16_t\l\
+- _spacing: float\l\
+- _chars: std::list\<Item*\>\l\
+- _autoRemove: bool\l\
+- _autoRemoveTime: float\l\
+- _removeStyle: RemoveStyle\l\
+|\
++ TextEntity(game: G&, resourceId: uint16_t, spacing: float, playerId: uint16_t)\l\
++ \<\<virtual\>\> ~TextEntity()\l\
+- _RemoveChars(style: RemoveStyle): void\l\
++ Run(time: float): void\l\
++ SetText(text: String const&): void\l\
++ GetText() const: String const&\l\
++ GetResourceId() const: uint16_t\l\
++ GetSpacing() const: float\l\
++ EnableAutoRemove(time: float): void\l\
++ HasAutoRemove() const: bool\l\
++ DisableAutoRemove(): void\l\
++ SetPosition(x: float, y: float, z: uint8_t): void\l\
++ SetBlinking(freq: size_t): void\l\
++ SetSpeed(x: float, y: float): void\l\
++ SetAccel(x: float, y: float): void\l\
++ SetRemoveStyle(style: RemoveStyle): void\l\
++ GetRemoveStyle() const: RemoveStyle\l\
+}"
+                ]
+
+                mm_Item [ label = "{Item}" ]
+                mm_ItemManager [label = "{EntityManager\<Entity, MenuPlayer\>}"]
+                mm_EntityManager [label = "{EntityManager\<Entity, MenuPlayer\>}"]
+
+            {rank=same ; mm_ButtonEntity ; mm_MenuEntity}
+            {rank=same ; mm_Entity ; mm_Player}
+            {rank=same ; mm_ItemManager ; mm_EntityManager}
+
+            }
+            mm_ItemManager -> mm_Game [arrowhead = diamond]
+            mm_Item -> mm_ItemManager [arrowhead = odiamond headlabel = "0..n"]
+            mm_EntityManager -> mm_Game [arrowhead = diamond]
+            mm_Entity -> mm_EntityManager [arrowhead = odiamond headlabel = "0..n"]
+            mm_Entity -> gc_Entity [arrowhead = none]
+            mm_Player -> gc_Player [arrowhead = none]
+            mm_TextEntity -> mm_Entity
+            mm_TextEntity -> mm_ButtonEntity [arrowhead = diamond]
+            mm_ButtonEntity -> mm_Entity
+            mm_Game -> gc_BasicGame
+            mm_MenuEntity -> mm_Entity
+            mm_TextEntity -> mm_MenuEntity [arrowhead = diamond]
+            mm_ButtonEntity -> mm_MenuEntity [arrowhead = diamond headlabel = "0..n"]
+            mm_TextEntity -> mm_Player [arrowhead = diamond]
+            mm_Item -> mm_TextEntity [arrowhead = diamond]
+            mm_Item -> mm_ButtonEntity [arrowhead = diamond]
+            mm_Item -> mm_MenuEntity [arrowhead = diamond]
+
+        /*Chicken DLL*/
+            subgraph cluster_Chicken
+            {
+                label = "Chicken Defender DLL"
+                fontsize = 16
+
+                ch_BackgroundEntity
+                [
+    label="{\
+BackgroundEntity\
+|\
+- _sprite: Item\l\
+- _music: Item\l\
+|\
++ BackgroundEntity(game: Game&)\l\
++ ~BackgroundEntity()\l\
+}"
+                ]
+
+                ch_ChickenEntity
+                [
+    label="{\
+ChickenEntity\
+|\
+- _sprite: Item\l\
+- _deathLocalId: int\l\
+- _superChicken: bool\l\
+|\
++ ChickenEntity(game: Game&, super: bool)\l\
++ ~ChickenEntity()\l\
+- _Explode(resourceLocalId: int): void\l\
+- _CreateFeathers(): void\l\
+- _MakeSound(resourceLocalId: int): void\l\
++ \<\<virtual\>\> Run(time: float): void\l\
++ \<\<virtual\>\> Interact(interaction: DamageInteraction&): bool\l\
+}"
+                ]
+
+                ch_ChickenGeneratorEntity
+                [
+    label="{\
+ChickenGeneratorEntity\
+|\
+- _nextSpawn: float\l\
+|\
++ ChickenGeneratorEntity(game: Game&, playerId: uint16_t)\l\
++ ~ChickenGeneratorEntity()\l\
++ \<\<virtual\>\> Run(time: float): void\l\
+}"
+                ]
+
+                ch_DamageInteraction
+                [
+    label="{\
+DamageInteraction\
+|\
+- _damage: size_t\l\
+|\
++ DamageInteraction(damage: size_t, area: Circle const&, entity: Entity*)\l\
++ ~DamageInteraction()\l\
++ \<\<virtual\>\> Interact(entity: Entity&): bool\l\
++ GetValue() const: size_t\l\
+}"
+                ]
+
+                ch_Entity
+                [
+    label="{\
+Entity\
+|\
+- _name: String\l\
+- _playerId: uint16_t\l\
+# _game: Game&\l\
+|\
++ Entity(game: Game&, name: String const&, playerId: uint16_t)\l\
++ \<\<virtual\>\> ~Entity()\l\
++ \<\<virtual\>\> GenerateInteractions(time: float): void\l\
++ \<\<virtual\>\> Run(time: float): void\l\
++ SetName(name: String const&): void\l\
++ GetName() const: String const&\l\
++ GetPlayerId() const: uint16_t\l\
++ SetPlayerId(playerId: uint16_t): void\l\
++ \<\<virtual\>\> Interact(interaction: DamageInteraction&): bool\l\
+}"
+                ]
+
+                ch_Game
+                [
+    label="{\
+Game\
+|\
+- _background: BackgroundEntity*\l\
+- _scoreBoard: ScoreBoardEntity*\l\
+|\
++ Game()\l\
++ ~Game()\l\
+# \<\<virtual\>\> _PreRun(): void\l\
+# \<\<virtual\>\> _PostRun(): void\l\
+# \<\<virtual\>\> _InitializeResources(): void\l\
+}"
+                ]
+
+                ch_Player
+                [
+    label="{\
+Player\
+|\
+- _game: Game&\l\
+- _generator: ChickenGeneratorEntity*\l\
+- _entity: PlayerEntity*\l\
+- _score: uint32_t\l\
+|\
++ Player(id: uint16_t, nick: String const&, address: HostAddress const&, game: Game&)\l\
++ Player(id: uint16_t, nick: String const&, address: HostAddress const&, game: BasicGame\<Entity, Player\>&)\l\
++ ~Player()\l\
++ IncrementScore(score: uint32_t): void\l\
++ GetScore() const: uint32_t\l\
++ PutBigDamage(posX: float, posY: float): void\l\
+}"
+                ]
+
+                ch_PlayerEntity
+                [
+    label="{\
+PlayerEntity\
+|\
+- _visor: Item\l\
+- _damage: InteractionPtr\l\
+- _bigDamage: InteractionPtr\l\
+- _gameTarget: uint16_t\l\
+- _leaveTime: float\l\
+|\
++ PlayerEntity(game: Game&, id: uint16_t)\l\
++ ~PlayerEntity()\l\
++ \<\<virtual\>\> Run(time: float): void\l\
++ PutBigDamage(posX: float, posY: float): void\l\
+}"
+                ]
+
+                ch_ScoreBoardEntity
+                [
+    label="{\
+ScoreBoardEntity\
+|\
+- _scores: std::map\<uint16_t, Score*\>\l\
+|\
++ ScoreBoardEntity(game: Game&)\l\
++ ~ScoreBoardEntity()\l\
++ \<\<virtual\>\> Run(time: float): void\l\
+}"
+                ]
+
+                ch_TextEntity
+                [
+    label="{\
+TextEntity\
+|\
+- _text: String\l\
+- _resourceId: uint16_t\l\
+- _spacing: float\l\
+- _chars: std::list\<Item*\>\l\
+- _autoRemove: bool\l\
+- _autoRemoveTime: float\l\
+- _removeStyle: RemoveStyle\l\
+- _id: int\l\
+- \<\<static\>\> ID: int\l\
+|\
++ TextEntity(game: Game&, resourceId: uint16_t, spacing: float, playerId: uint16_t)\l\
++ \<\<virtual\>\> ~TextEntity()\l\
+- _RemoveChars(style: RemoveStyle): void\l\
++ Run(time: float): void\l\
++ SetText(text: String const&): void\l\
++ GetText() const: String const&\l\
++ GetResourceId() const: uint16_t\l\
++ GetSpacing() const: float\l\
++ EnableAutoRemove(time: float): void\l\
++ HasAutoRemove() const: bool\l\
++ DisableAutoRemove(): void\l\
++ SetPosition(x: float, y: float, z: uint8_t): void\l\
++ SetBlinking(freq: size_t): void\l\
++ SetSpeed(x: float, y: float): void\l\
++ SetAccel(x: float, y: float): void\l\
++ SetRemoveStyle(style: RemoveStyle): void\l\
++ GetRemoveStyle() const: RemoveStyle\l\
+}"
+                ]
+
+                ch_Item [label = "Item"]
+                ch_ItemManager [label = "ItemManager\<Entity, Player\>"]
+                ch_EntityManager [label = "EntityManager\<Entity, Player\>"]
+
+                {rank=same ; ch_ItemManager ; ch_EntityManager}
+            }
+ch_Game -> gc_BasicGame
+ch_Entity -> gc_Entity [arrowhead = none]
+ch_Player -> gc_Player [arrowhead = none]
+
+ch_Item -> ch_ItemManager [arrowhead = odiamond headlabel = "0..n"]
+ch_ItemManager -> ch_Game [arrowhead = diamond]
+
+ch_Entity -> ch_EntityManager [arrowhead = odiamond headlabel = "0..n"]
+ch_EntityManager -> ch_Game [arrowhead = diamond]
+
+ch_ScoreBoardEntity -> ch_Entity
+ch_PlayerEntity -> ch_Entity
+ch_BackgroundEntity -> ch_Entity
+ch_ChickenGeneratorEntity -> ch_Entity
+ch_ChickenEntity -> ch_Entity
+ch_TextEntity -> ch_Entity
+
+ch_TextEntity -> ch_ScoreBoardEntity [arrowhead = diamond]
+
+ch_Item -> ch_TextEntity [arrowhead = diamond]
+ch_Item -> ch_BackgroundEntity [arrowhead = diamond]
+ch_Item -> ch_PlayerEntity [arrowhead = diamond]
+ch_Item -> ch_ChickenEntity [arrowhead = diamond]
+
+ch_DamageInteraction -> ch_PlayerEntity [arrowhead = diamond]
+ch_BackgroundEntity -> ch_Game [arrowhead = diamond]
+ch_ScoreBoardEntity -> ch_Game [arrowhead = diamond]
+ch_PlayerEntity -> ch_Player [arrowhead = diamond]
+ch_ChickenGeneratorEntity -> ch_Player [arrowhead = diamond]
+
+
+
+            subgraph cluster_RType
+            {
+                label = "RType DLL"
+                fontsize = 16
+            }
+} // implementation games
+        }
+    }
+
+/* Client */
+    subgraph cluster_Client
+    {
+        label = "Client"
+        fontsize = 24
+
+    /* Libraries */
+        subgraph cluster_Lib
+        {
+            label = "Libraries"
+            fontsize = 16;
+
+    /* Qt */
+            subgraph cluster_Qt
+            {
+                label = "Qt"
+                fontsize = 13;
+
+                qt_QMainWindow [ label = "QMainWindow" ]
+                qt_QThread [ label = "QThread" ]
+            }
+
+    /* Sfml */
+            subgraph cluster_SFML
+            {
+                label = "SFML"
+                fontsize = 13;
+
+                sf_NonCopyable [ label = "sf::NonCopyable" ]
+                sf_Image [ label = "sf::Image" ]
+                sf_Sound [ label = "sf::Sound" ]
+            }
+        }
+
+/* Base */
+        cl_Terminal
+        [
+    label="{\
+Terminal\
+|\
+- _app: QApplication\l\
+- _network: INetwork*\l\
+- _updaterWindow: UpdaterWindow*\l\
+- _connectionWindow: ConnectionWindow*\l\
+- _gameView: IGameView*\l\
+- _mutex: QMutex\l\
+|\
++ Terminal(ac: int, av: char**)\l\
++ ~Terminal()\l\
++ Run(): int\l\
++ InformUser(message: String const&) const: void\l\
++ GetNetwork(): INetwork*\l\
++ GetUpdaterWindow(): UpdaterWindow*\l\
++ GetConnectionWindow(): ConnectionWindow*\l\
++ GetGameView(): IGameView*\l\
++ CloseWindows(): void\l\
+}"
+        ]
+
+/* Network */
+        cl_INetwork
+        [
+    label="{\
+INetwork\
+|\
+|\
++ \<\<virtual\>\> ~INetwork()\l\
++ \<\<abstract\>\> Connect(ip: String const&, port: unsigned short): void\l\
++ \<\<abstract\>\> GetHost() const: String const&\l\
++ \<\<abstract\>\> SendTcpPacket(packet: Packet const&): void\l\
++ \<\<abstract\>\> SendUdpPacket(packet: Packet const&): void\l\
++ \<\<abstract\>\> SetServerUdpPort(port: uint16_t): void\l\
++ \<\<abstract\>\> GetClientId() const: uint16_t\l\
++ \<\<abstract\>\> SetClientId(clientId: uint16_t): void\l\
+}"
+        ]
+
+        cl_QtNetwork
+        [
+    label="{\
+QtNetwork\
+|\
+- _term: Terminal&\l\
+- _socket: QTcpSocket*\l\
+- _udpSocket: QUdpSocket*\l\
+- _packetSize: uint16_t\l\
+- _host: String\l\
+- _serverAddress: QHostAddress\l\
+- _serverUdpPort: quint16\l\
+- _packetManager: TcpPacketManager*\l\
+- _clientId: uint16_t\l\
+|\
++ QtNetwork(term: Terminal&)\l\
++ ~QtNetwork()\l\
++ Connect(ip: String const&, port: unsigned short): void\l\
++ GetHost() const: String const&\l\
++ SendUdpPacket(packet: Packet const&): void\l\
++ SendTcpPacket(packet: Packet const&): void\l\
++ SetServerUdpPort(port: uint16_t): void\l\
++ GetClientId() const: uint16_t\l\
++ SetClientId(clientId: uint16_t): void\l\
+- _SocketReady(): void\l\
+- _SocketConnected(): void\l\
+- _SocketDisconnected(): void\l\
+- _SocketError(error: QAbstractSocket::SocketError): void\l\
+- _UdpSocketReady(): void\l\
+}"
+        ]
+
+        cl_TcpPacketManager
+        [
+    label="{\
+TcpPacketManager\
+|\
+- _handlers: std::map\<uint8_t, handlerMethod\>\l\
+- _term: Terminal&\l\
+- _currentItem: size_t\l\
+- _totalItems: size_t\l\
+- _resources: std::list\<ResourceMetadata*\>\l\
+- _file: QFile\l\
+- _fileSize: size_t\l\
+- _receivedWelcome: bool\l\
+- _receivedResources: bool\l\
+- _downloadingFinished: bool\l\
+|\
++ TcpPacketManager(term: Terminal&)\l\
++ ~TcpPacketManager()\l\
+- _CheckForFinishedDownload(): void\l\
+- _AddResource(meta: ResourceMetadata*): void\l\
+- _RequestResources(): void\l\
+- _PacketIHaveThis(p: Packet const&): void\l\
+- _PacketPleaseComeIn(p: Packet const&): void\l\
+- _PacketTakeIt(p: Packet const&): void\l\
+- _PacketTakeSomeMore(p: Packet const&): void\l\
+- _PacketWatchThisOut(p: Packet const&): void\l\
+- _PacketPing(p: Packet const&): void\l\
++ ProcessPacket(p: Packet const&): void\l\
+}"
+        ]
+
+/* Graphics */
+        cl_SfmlAnimation
+        [
+    label="{\
+SfmlAnimation\
+|\
+- _image: sf::Image\l\
+- _path: String\l\
+- _frames: size_t\l\
+- _delay: size_t\l\
+- _isVertical: bool\l\
+- _loaded: bool\l\
+- _smoothing: bool\l\
+|\
++ SfmlAnimation(path: String const&, frames: size_t, delay: size_t, isVertical: bool, smoothing: bool)\l\
++ ~SfmlAnimation()\l\
++ IsLoaded(): bool\l\
++ Load(): void\l\
++ GetImage(): sf::Image&\l\
++ GetFrames(): size_t\l\
++ GetDelay(): size_t\l\
++ IsVertical(): bool\l\
+}"
+        ]
+
+        cl_SfmlSound
+        [
+    label="{\
+SfmlSound\
+|\
+- _path: String\l\
+- _isMusic: bool\l\
+- _loaded: bool\l\
+- _buffer: sf::SoundBuffer\l\
+|\
++ SfmlSound(path: String const&, isMusic: bool)\l\
++ ~SfmlSound()\l\
++ IsLoaded(): bool\l\
++ Load(): void\l\
++ IsMusic(): bool\l\
++ GetSoundBuffer(): sf::SoundBuffer&\l\
++ GetPath(): String const&\l\
+}"
+        ]
+
+        cl_SfmlRenderer
+        [
+    label="{\
+SfmlRenderer\
+|\
+- _view: SfmlGameView&\l\
+- _items: std::map\<size_t, IItem*\>\l\
+- _layers: std::map\<size_t, std::list\<IItem*\>\>\l\
+- _killPool: std::list\<IItem*\>\l\
+- _width: size_t\l\
+- _height: size_t\l\
+- _mouseX: float\l\
+- _mouseY: float\l\
+|\
++ SfmlRenderer(view: SfmlGameView&)\l\
++ ~SfmlRenderer()\l\
+- _ProcessKillPool(): void\l\
+- _RemoveAllItems(): void\l\
++ Render(app: sf::RenderWindow*, time: float): void\l\
++ ProcessPacket(p: Packet const&): void\l\
++ AddItem(item: IItem*, pos: size_t): void\l\
++ RemoveItem(item: IItem*, pos: size_t): void\l\
++ DeleteItem(item: IItem*): void\l\
++ SetSize(width: size_t, height: size_t): void\l\
++ SetMousePos(x: float, y: float): void\l\
++ GetWidth() const: size_t\l\
++ GetHeight() const: size_t\l\
++ GetMouseX() const: float\l\
++ GetMouseY() const: float\l\
+}"
+        ]
+
+        cl_IItem
+        [
+    label="{\
+IItem\
+|\
+|\
++ \<\<virtual\>\> ~IItem()\l\
++ \<\<abstract\>\> Render(app: sf::RenderWindow*, time: float): void\l\
++ \<\<abstract\>\> SetResourceId(id: size_t): void\l\
++ \<\<abstract\>\> SetPositionX(pos: float): void\l\
++ \<\<abstract\>\> SetPositionY(pos: float): void\l\
++ \<\<abstract\>\> SetSpeedX(speed: float): void\l\
++ \<\<abstract\>\> SetSpeedY(speed: float): void\l\
++ \<\<abstract\>\> SetAccelX(accel: float): void\l\
++ \<\<abstract\>\> SetAccelY(accel: float): void\l\
++ \<\<abstract\>\> SetLifeTimeMs(ms: size_t): void\l\
++ \<\<abstract\>\> SetLifeTimeCycles(cycles: size_t): void\l\
++ \<\<abstract\>\> SetDisapear(enable: bool): void\l\
++ \<\<abstract\>\> SetPositionZ(pos: size_t): void\l\
++ \<\<abstract\>\> SetBlinking(freq: size_t): void\l\
++ \<\<abstract\>\> SetCursor(enable: bool): void\l\
++ \<\<abstract\>\> SetFrame(frame: size_t): void\l\
+}"
+        ]
+
+        cl_SoundItem
+        [
+    label="{\
+SoundItem\
+|\
+- _view: SfmlGameView&\l\
+- _renderer: SfmlRenderer&\l\
+- _resource: SfmlSound*\l\
+- _sound: sf::Sound\l\
+- _music: sf::Music\l\
+- _lifeTimeMs: size_t\l\
+- _lifeTimeCycles: size_t\l\
+- _lifeTimeSet: bool\l\
+- _lifeTime: float\l\
+- _cyclesCounter: size_t\l\
+|\
++ SoundItem(resourceId: size_t, view: SfmlGameView&, renderer: SfmlRenderer&)\l\
++ ~SoundItem()\l\
++ Render(app: sf::RenderWindow*, time: float): void\l\
++ SetResourceId(id: size_t): void\l\
++ SetPositionX(pos: float): void\l\
++ SetPositionY(pos: float): void\l\
++ SetSpeedX(speed: float): void\l\
++ SetSpeedY(speed: float): void\l\
++ SetAccelX(accel: float): void\l\
++ SetAccelY(accel: float): void\l\
++ SetLifeTimeMs(ms: size_t): void\l\
++ SetLifeTimeCycles(cycles: size_t): void\l\
++ SetDisapear(enable: bool): void\l\
++ SetPositionZ(pos: size_t): void\l\
++ SetBlinking(freq: size_t): void\l\
++ SetCursor(enable: bool): void\l\
++ SetFrame(frame: size_t): void\l\
+}"
+        ]
+
+        cl_SpriteItem
+        [
+    label="{\
+SpriteItem\
+|\
+- _view: SfmlGameView&\l\
+- _renderer: SfmlRenderer&\l\
+- _anim: SfmlAnimation*\l\
+- _sprite: sf::Sprite\l\
+- _posZ: size_t\l\
+- _speedX: float\l\
+- _speedY: float\l\
+- _accelX: float\l\
+- _accelY: float\l\
+- _lifeTimeMs: size_t\l\
+- _lifeTimeCycles: size_t\l\
+- _disapear: bool\l\
+- _blinking: size_t\l\
+- _cursor: bool\l\
+- _currentFrame: size_t\l\
+- _lastFrameTime: float\l\
+- _lastBlinkTime: float\l\
+- _blinkDisplay: bool\l\
+- _lifeTimeSet: bool\l\
+- _lifeTime: float\l\
+- _cyclesCounter: size_t\l\
+- _spawned: bool\l\
+|\
++ SpriteItem(resourceId: size_t, view: SfmlGameView&, renderer: SfmlRenderer&)\l\
++ ~SpriteItem()\l\
+- _SetAnimationFrame(frame: size_t): void\l\
+- _GetWidth(): size_t\l\
+- _GetHeight(): size_t\l\
++ Render(app: sf::RenderWindow*, time: float): void\l\
++ SetResourceId(id: size_t): void\l\
++ SetPositionX(pos: float): void\l\
++ SetPositionY(pos: float): void\l\
++ SetSpeedX(speed: float): void\l\
++ SetSpeedY(speed: float): void\l\
++ SetAccelX(accel: float): void\l\
++ SetAccelY(accel: float): void\l\
++ SetLifeTimeMs(ms: size_t): void\l\
++ SetLifeTimeCycles(cycles: size_t): void\l\
++ SetDisapear(enable: bool): void\l\
++ SetPositionZ(pos: size_t): void\l\
++ SetBlinking(freq: size_t): void\l\
++ SetCursor(enable: bool): void\l\
++ SetFrame(frame: size_t): void\l\
+}"
+        ]
+
+        cl_EventManager
+        [
+    label="{\
+EventManager\
+|\
+- _network: INetwork*\l\
+- _mouseX: float\l\
+- _lastMouseX: float\l\
+- _mouseY: float\l\
+- _lastMouseY: float\l\
+- _keyboard: std::map\<int, int\>\l\
+- _mouse: std::map\<int, int\>\l\
+- _keyStatus: bool[sf::Key::Count]\l\
+- _lastTime: float\l\
+|\
++ EventManager(network: INetwork*)\l\
++ ~EventManager()\l\
+- _HandleKeyboardEvent(type: int, code: int): void\l\
+- _HandleMouseEvent(type: int, code: int): void\l\
+- _KeyboardToNet(code: int): int\l\
+- _MouseToNet(code: int): int\l\
++ ProcessEvents(app: sf::RenderWindow*, time: float): void\l\
++ GetMouseX() const: float\l\
++ GetMouseY() const: float\l\
+}"
+        ]
+
+        cl_IGameView
+        [
+    label="{\
+IGameView\
+|\
+|\
++ \<\<virtual\>\> ~IGameView()\l\
++ \<\<abstract\>\> Start(): void\l\
++ \<\<abstract\>\> Stop(): void\l\
++ \<\<abstract\>\> IsRunning() const: bool\l\
++ \<\<abstract\>\> PushData(data: char*, size: size_t): void\l\
++ \<\<abstract\>\> AddAnimation(id: size_t, path: String const&, frames: size_t, delay: size_t, isVertical: bool): void\l\
++ \<\<abstract\>\> AddSound(id: size_t, path: String const&, isMusic: bool): void\l\
++ \<\<abstract\>\> SetResolution(width: size_t, height: size_t): void\l\
++ \<\<abstract\>\> EnableSmoothing(enable: bool): void\l\
++ \<\<abstract\>\> ConfirmItem(id: size_t): void\l\
+}"
+        ]
+
+        cl_SfmlGameView
+        [
+    label="{\
+SfmlGameView\
+|\
+- _term: Terminal&\l\
+- _app: sf::RenderWindow*\l\
+- _frameTimer: QTimer\l\
+- _packets: std::queue\<Packet*\>\l\
+- _animations: std::map\<size_t, SfmlAnimation*\>\l\
+- _sounds: std::map\<size_t, SfmlSound*\>\l\
+- _renderer: SfmlRenderer*\l\
+- _clock: sf::Clock\l\
+- _smoothing: bool\l\
+- _eventManager: EventManager\l\
+- _confirmations: std::queue\<size_t\>\l\
+- _isRunning: bool\l\
+|\
++ SfmlGameView(term: Terminal&)\l\
++ ~SfmlGameView()\l\
+- _Init(): void\l\
+- _Exit(): void\l\
+- _SendConfirmations(): void\l\
+- _RenderFrame(): void\l\
++ Start(): void\l\
++ Stop(): void\l\
++ IsRunning() const: bool\l\
++ PushData(data: char*, size: size_t): void\l\
++ AddAnimation(id: size_t, path: String const&, frames: size_t, delay: size_t, isVertical: bool): void\l\
++ AddSound(id: size_t, path: String const&, isMusic: bool): void\l\
++ SetResolution(width: size_t, height: size_t): void\l\
++ EnableSmoothing(enable: bool): void\l\
++ ConfirmItem(id: size_t): void\l\
++ GetAnimation(id: size_t): SfmlAnimation*\l\
++ GetSound(id: size_t): SfmlSound*\l\
+}"
+        ]
+
+/* Windows */
+        subgraph cluster_QtGeneratedClasses
+        {
+            label = "Qt Generated Classes"
+            fontsize = 16;
+
+            cl_UiUpdater
+            [
+                label = "{ Ui::Updater }"
+            ]
+
+            cl_UiConnection
+            [
+                label = "{ Ui::Connection }"
+            ]
+        }
+
+        cl_UpdaterWindow
+        [
+    label="{\
+UpdaterWindow\
+|\
+- _term: Terminal&\l\
+|\
++ UpdaterWindow(term: Terminal&)\l\
++ ~UpdaterWindow()\l\
+- keyPressEvent(e: QKeyEvent*): void\l\
+- on_cancelPushButton_clicked(): void\l\
+- on_playPushButton_clicked(): void\l\
+- on_enableSmoothingCheckBox_stateChanged(state: int): void\l\
++ AddMessage(message: String const&): void\l\
++ EnablePlay(enable: bool): void\l\
++ SetTotalBar(val: int): void\l\
++ SetCurrentBar(val: int): void\l\
++ SetStatus(status: String const&): void\l\
+}"
+        ]
+        cl_UpdaterWindow -> qt_QMainWindow
+        cl_UpdaterWindow -> cl_UiUpdater
+
+        cl_ConnectionWindow
+        [
+    label="{\
+ConnectionWindow\
+|\
+- _term: Terminal&\l\
+|\
++ ConnectionWindow(term: Terminal&)\l\
++ ~ConnectionWindow()\l\
+- keyPressEvent(e: QKeyEvent*): void\l\
+- _ReadInfos(): void\l\
+- _WriteInfos() const: void\l\
+- on_okPushButton_clicked(): void\l\
+- on_quitPushButton_clicked(): void\l\
++ EnableConnection(enable: bool): void\l\
++ GetNickname() const: String\l\
+}"
+        ]
+        cl_ConnectionWindow -> qt_QMainWindow
+        cl_ConnectionWindow -> cl_UiConnection
+
+
+        cl_SfmlGameView -> cl_IGameView
+        cl_SfmlGameView -> sf_NonCopyable
+        cl_SfmlRenderer -> cl_SfmlGameView [arrowhead = diamond]
+        cl_SfmlAnimation -> cl_SfmlGameView [arrowhead = odiamond headlabel = "0..n"]
+        cl_SfmlSound -> cl_SfmlGameView [arrowhead = odiamond headlabel = "0..n"]
+        cl_EventManager -> cl_SfmlGameView [arrowhead = diamond]
+        cl_EventManager -> sf_NonCopyable
+        cl_SpriteItem -> cl_IItem
+        cl_SfmlAnimation -> cl_SpriteItem [arrowhead = diamond]
+        cl_SoundItem -> cl_IItem
+        cl_SfmlSound -> cl_SoundItem [arrowhead = diamond]
+        cl_SfmlRenderer -> sf_NonCopyable
+        cl_SfmlGameView -> cl_SfmlRenderer [arrowhead = diamond]
+        cl_IItem -> cl_SfmlRenderer [arrowhead = odiamond headlabel = "0..n"]
+        sf_Sound -> cl_SfmlSound [arrowhead = diamond]
+        sf_Image -> cl_SfmlAnimation [arrowhead = diamond]
+        cl_QtNetwork -> cl_INetwork
+        cl_TcpPacketManager -> cl_QtNetwork [arrowhead = diamond]
+        cl_Terminal -> sf_NonCopyable
+        cl_INetwork -> cl_Terminal [arrowhead = diamond]
+        cl_UpdaterWindow -> cl_Terminal [arrowhead = diamond]
+        cl_ConnectionWindow -> cl_Terminal [arrowhead = diamond]
+        cl_IGameView -> cl_Terminal [arrowhead = diamond]
+
+
+    }
+
+
+
+}
+
+/*
+Trucs utiles:
+- heritage: parent -> child
+- membre: child -> parent [arrowhead = diamond]
+- agregation: child -> parent [arrowhead = odiamond]
+- invisible:
+    parent -> child
+    [
+        style = invisible
+        arrowhead = none
+    ]
+*/

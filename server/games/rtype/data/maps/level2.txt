@@ -1,0 +1,64 @@
+Level 2
+/                  \
+/    wwwwww        \
+/    wwwwww        \
+/       0          \
+/                  \
+/                  \
+/                  \
+/                  \
+(      rrrr        )
+
+/           1
+{       2
+(    3             )
+                   }
+                   \
+
+/rarararararararara\
+/                  \
+/     0            \
+/        1         \
+/          2       \
+/            3     \
+/                  \
+/                  \
+/rarararararararara\
+/wwwwwwwwwwwwwwwwww\
+/                  \
+/                  \
+/        wa        }
+/        wa        }
+/        wa        }
+/        wa        }
+/        wa        }
+/        wa        }
+/        wa        }
+/        ra        \
+/        ra        \
+/        aa        \
+
+/t                 \
+/t                 \
+/t                 \
+{wwwwwwwwwwwwwwwwww\
+{       012345     \
+{       012345     \
+{       012345     \
+{wwwwwwwwwwwwwwwwww\
+{aaaa              \
+{    aaaa          \
+{        aaaa      \
+{            aaaa  \
+{       r          \
+/       r          \
+/       r          \
+
+/                  \
+/                  \
+/                  \
+/                  \
+/                  \
+/                  \
+/         !        \
+/                  \

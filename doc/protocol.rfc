@@ -1,0 +1,1203 @@
+GMGP Working Group                                             D. Garyga
+Request for Comments: 0000                                    R. Londeix
+Category: Experimental                                        B. Mancone
+                                                                M. Tapia
+                                                               J. Virant
+                                                                 Epitech
+                                                               July 2010
+
+                Generic Multiplayer Gaming Protocol
+
+Abstract
+
+   This document describes how to be awesome.
+
+Status of This Memo
+
+   This memo defines an Experimental Protocol for the
+   Internet community.  This memo does not specify an Internet standard
+   of any kind.  Discussion and suggestions for improvement
+   are requested. Distribution of this memo is unlimited.
+
+Copyright Notice
+
+  Copryright (c) 2010 The GMGP team.
+
+Table of Contents
+
+   1. Introduction ....................................................2
+      1.1 Conventions Used in This Document ...........................2
+   2. Session Management ..............................................2
+   3. TCP Message Exchange ............................................3
+   4. TCP Packets Description .........................................4
+   4.1. Client Authentification : <Anyone There ?> ....................5
+   4.2. Server Response : <Please, Come in.>, <I Have This> ...........5
+   4.3. Client Update : <I Need This>, <Take It>, <Take Some More> ....7
+   4.4. Client Ready : <Let's Go !>, <Watch This Out> .................8
+   4.5. Connection Maintenance : <PING>, <PONG> .......................9
+   5. UDP Message Exchange ...........................................10
+   5.1. UDP Client To Server Packet Description ......................10
+   5.2. UDP Server To Client Packet Description ......................13
+   6. Packet Details .................................................15
+   7. Security Considerations ........................................15
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Garyga                       Experimental                       [page 1]  //LINE 57
+
+RFC 0000                        GMGP                           July 2010
+
+
+
+1.  Introduction
+
+   This RFC provides informations about a fantastic new protocol
+   that is gonna blow your head off : GMGP.
+   This protocol is intended to  be used between clients and servers
+   on host computers.
+
+1.1.  Conventions Used in This Document
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL"
+   in this document are to be interpreted as described in RFC 2119.
+
+2.  Session Management
+
+   A GMGP session requires creation of a TCP connection between
+   two peers, one that initiates the connection request and one that
+   responds to the connection request.  The initiating peer is called
+   the "client", and the responding peer is called the "server".
+   A GMGP server MUST listen for TCP connection requests on a standard
+   TCP port.
+
+   The client MUST send a <Anyone There ?> right after the TCP session
+   has been initiated. The server then responds with a
+   <Please, Come in.>.
+
+   The GMGP session is normally ended by the client closing the
+   TCP connection.
+
+   Both GMGP server AND client MAY end a TCP session if the other part
+   is not responding to a <PING> after an implementation-defined period.
+   The client not sending <Anyone There ?> to the server after a
+   server-defined period is also a sufficient reason to end the
+   TCP session.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Garyga                       Experimental                       [page 2]  //LINE 113
+
+RFC 0000                        GMGP                           July 2010
+
+
+3. TCP Message Exchange
+
+   A GMGP client sends commands to a server on a single TCP connection.
+   A client MUST NOT distribute commands from a single GMGP session
+   over multiple TCP connections.
+
+   Each TCP packet MUST contain a single packet type.
+
+   TCP packet from from the client AND from the server MUST be processed
+   independently and in the same order as sent.
+
+
+
+                       Client                  Server
+                   |                                     |
+                   |                Connect              |
+                   | >>------------------------------->> |
+                   |                                     |
+                   |        Send <Anyone There ?>        |
+                   | >>------------------------------->> |
+                   |                                     |
+                   |        Send <Please, Come in.>      |
+                   | <<-------------------------------<< |
+                   |                                     |
+                   |         Send <I Have This>          |
+                   | <<-------------------------------<< |
+                   |                                     |
+                   |         Send <I Need This>          |
+                   | >>------------------------------->> |
+                   |                                     |
+                   |           Send <Take It>            |
+                   | <<-------------------------------<< |
+                   |                                     |
+                   |             Send <PING>             |
+                   | >>------------------------------->> |
+                   |                                     |
+                   |             Send <PONG>             |
+                   | <<-------------------------------<< |
+                   |                                     |
+                   |             Send <PING>             |
+                   | <<-------------------------------<< |
+                   |                                     |
+                   |             Send <PONG>             |
+                   | >>------------------------------->> |
+
+                Figure 1: Client-Server TCP Message Exchange
+
+
+
+
+
+Garyga                       Experimental                       [page 3]  //LINE 169
+
+RFC 0000                        GMGP                           July 2010
+
+
+4. TCP Packets Description
+
+   EVERY TCP packet MUST be structured the way it is described in this
+   RFC. If a mal-structured packet is received by either the client
+   OR the server, this last SHOULD close the TCP connection.
+
+   EVERY more-than-one-byte-sized number in the packet MUST be written
+   in big endian. The Great Internet Law decided so.
+
+   EVERY TCP packet begins with his own size, coded on two bytes.
+   Following the packet size, the packet MUST contain his type, coded
+   on one byte.
+   See Figure 2.
+
+
+
+              --------------------------------------
+              | byte 1 |                           |
+              |--------| Packet Size in Bytes      |
+              | byte 2 | (unsigned)                |
+              |------------------------------------|
+              | byte 3 | Packet Type (unsigned)    |
+              |------------------------------------|
+              |        | Specific Packet Data      |
+              |        |                           |
+
+            Figure 2. General Packet Header Description
+
+
+
+   Here is the list (exhaustive) of the 10 different TCP packet types,
+   with their values :
+
+              <Anyone There ?> ........4
+              <Please, Come in.> ......8
+              <I Have This> ...........15
+              <I Need This> ...........16
+              <Take It> ...............23
+              <Take Some More> ........42
+              <Let's Go !> ............69
+              <Watch This Out> ........88
+              <PING> ..................111
+              <PONG> ..................222
+
+
+
+
+
+
+
+
+Garyga                       Experimental                       [page 4]  //LINE 225
+
+RFC 0000                        GMGP                           July 2010
+
+
+4.1. Client Authentification : <Anyone There ?>
+
+   This packet contains a protocol-defined magic string :
+   "hallal_a = close", then the user nickname is written as a string.
+   See Figure 3.
+
+   Strings are described in the appropriate section of this RFC.
+
+
+
+              |            Packet Header           |
+              |------------------------------------|
+              | string |    magic string           |
+              |        |    "hallal_a = close"     |
+              |------------------------------------|
+              | string |    user nickname          |
+              --------------------------------------
+
+            Figure 3. <Anyone There ?> Packet Description
+
+
+
+
+4.2. Server Response : <Please, Come in.>, <I Have This>
+
+   Once the client has been authenticated, the server has to send him
+   those informations in the <Please, Come in.> :
+        - The id the client will have to use for UDP communication
+        - The number of files the client will need to play on
+          this server. This number is also the number of <I Have This>
+          that will be sent right after the <Please Come in.>.
+   See Figure 4.
+
+   The <I Have This> informs the GMGP client about a multimedia item
+   he is going to need. It both describes the file itself, and some
+   informations about what to do with it.
+   See figure 4.
+
+
+
+              |            Packet Header           |
+              |------------------------------------|
+              | uint16 |    Client ID              |
+              |------------------------------------|
+              | uint16 |    Items count            |
+              --------------------------------------
+
+            Figure 4. <Please, Come in.> Packet Description
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Garyga                       Experimental                       [page 5]  //LINE 293
+
+RFC 0000                        GMGP                           July 2010
+
+
+              |            Packet Header           |
+              |------------------------------------|
+              | uint16 |    Item ID                |
+              |------------------------------------|
+              | uint8  |    Item Type              |
+              |        |  0 for image file         |
+              |        |  1 for audio file         |
+              |        |  2 for lua file           |
+              |------------------------------------|
+              | string |    File Path              |
+              |------------------------------------|
+              |      Specific Informations         |
+
+     Specific Informations :
+
+         Audio
+              |                                    |
+              |------------------------------------|
+              | uint8 |  Is a Music (bool)         |
+              --------------------------------------
+
+        Texture
+              |                                    |
+              |------------------------------------|
+              | uint16 |  Frames Count             |
+              |------------------------------------|
+              | uint16 |  Delay Between Each Frame |
+              |        |  (in milliseconds)        |
+              |------------------------------------|
+              | uint8  |  Is Vertical (bool)       |
+              --------------------------------------
+
+           Lua
+              |                                    |
+              |------------------------------------|
+              | string |  Function name            |
+              --------------------------------------
+
+            Figure 5. <I Have This> Packet Description
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Garyga                       Experimental                       [page 6]  //LINE 361
+
+RFC 0000                        GMGP                           July 2010
+
+
+4.3. Client Update : <I Need This>, <Take It>, <Take Some More>
+
+   These three packets are meant for file transferts, in case the
+   client does not have all the resources he needs.
+   <I Need This> is sent by the client, it contains the item id.
+   When the server receives a <I Need This>, it SHOULD send the
+   corresponding file to the client. To do this, there is <Take It> and
+   <Take Some More> : <Take It> describes the file size, and
+   <Take Some More> contains data from the file.
+   See Figures 6, 7, 8.
+
+   The client MAY send several <I Need This> before the server sends
+   the response.  The server MAY send the responses in disorder, but
+   after sending a <Take It>, it MUST send the FULL file by the
+   <Take Some More> before sending ANY OTHER packet.
+
+
+              |            Packet Header           |
+              |------------------------------------|
+              | uint16 |    Item ID                |
+              --------------------------------------
+
+            Figure 6. <I Need This> Packet Description
+
+
+
+
+              |            Packet Header           |
+              |------------------------------------|
+              | uint16 |    Item ID                |
+              |------------------------------------|
+              | uint32 |    Bytes Count            |
+              --------------------------------------
+
+            Figure 7. <Take It> Packet Description
+
+
+
+
+              |            Packet Header           |
+              |------------------------------------|
+              |              File Data             |
+              |       (size is in header infos)    |
+              --------------------------------------
+
+            Figure 8. <Take Some More> Packet Description
+
+
+
+
+
+Garyga                       Experimental                       [page 7]  //LINE 417
+
+RFC 0000                        GMGP                           July 2010
+
+
+4.4. Client Ready : <Let's Go !>, <Watch This Out>
+
+   Once the GMGP client possesses all the files it needs, it MAY send a
+   <Let's Go !> to signal it to the server (unless the user does not
+   want to play).
+   See Figure 9.
+   The server then MUST send a <Watch This Out>, containing the basic
+   game informations (resolution), and the UDP port on which the client
+   has to send his input informations.
+   See Figure 10.
+
+
+              |            Packet Header           |
+              |------------------------------------|
+              | uint16 |    UDP port               |
+              --------------------------------------
+
+            Figure 9. <Let's Go !> Packet Description
+
+
+
+
+              |            Packet Header           |
+              |------------------------------------|
+              | uint16 |    X game resolution      |
+              |------------------------------------|
+              | uint16 |    Y game resolution      |
+              |------------------------------------|
+              | uint16 |    UDP Port               |
+              --------------------------------------
+
+           Figure 10. <Watch This Out> Packet Description
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Garyga                       Experimental                       [page 8]  //LINE 473
+
+RFC 0000                        GMGP                           July 2010
+
+
+4.5. Connection Maintenance : <PING>, <PONG>
+
+   GMGP client AND server SHOULD send <PING> at regular intervals in
+   order to check for the sanity of the TCP connection.
+   If the other part does not respond with a <PONG> after an
+   implementation-defined delay, the <PING> sender SHOULD close the TCP
+   AND GMGP session.
+   See Figures 11 and 12.
+
+
+              |            Packet Header           |
+              |------------------------------------|
+              | string |     ping string           |
+              --------------------------------------
+
+               Figure 11. <PING> Packet Description
+
+
+
+
+
+              |            Packet Header           |
+              |------------------------------------|
+              | string |     ping string           |
+              --------------------------------------
+
+               Figure 12. <PONG> Packet Description
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Garyga                       Experimental                       [page 9]  //LINE 529
+
+RFC 0000                        GMGP                           July 2010
+
+
+5. UDP Message Exchange
+
+   GMGP client AND server MUST be able to receive UDP
+   packets on a implementation-defined port. This port MUST be present
+   in the <Anyone There ?> for the client, and in the <Watch This Out>
+   for the server.
+   The server May send multiple <Watch This Out>, and the client MUST
+   change his UDP target after each of them.
+
+   UDP packets are used for all In-Game informations, TCP is kind of the
+   administrative part of the protocol.
+
+   Both client AND server MAY send a single UDP packet multiple times,
+   in case they are not confident in UDP protocol efficiency.
+
+5.1. UDP Client To Server Packet Description
+
+   A GMGP client SHOULD send every user input from keyboard AND mouse
+   to the server.  These informations MUST be sent by UDP procotol on
+   the port given by the server.
+
+   A client-to-server UDP packet is also used to confirm the reception
+   of a packet, if the server asked confirmation.
+
+   A client-to-server UDP packet MUST contain these informations :
+   - The client ID number
+   - The type of the packet (input / confirmation)
+
+   See Figures 13, 14, 15, 16, 17, 18.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Garyga                       Experimental                      [page 10]  //LINE 585
+
+RFC 0000                        GMGP                           July 2010
+
+
+              --------------------------------------
+              | uint16 |     Client ID             |
+              |------------------------------------|
+              | uint32 |     Packet Infos          |
+              |        |                           |
+              |        |  mask:                    |
+              |        | 0x80000000 = packet type  |
+              |        |  (0 for input,            |
+              |        |   1 for confirmation)     |
+              |------------------------------------|
+              | Confirmation Specific Informations |
+              |           (Optional)               |
+              --------------------------------------
+
+    Figure 13. client-to-server UDP Global Packet Description
+
+
+
+
+
+
+                 Mask                Value
+              --------------------------------------
+              | 0x80000000 |         0             |
+              |------------------------------------|
+              | 0x40000000 |   input device        |
+              |            | 0 = keyboard          |
+              |            | 1 = mouse             |
+              |------------------------------------|
+              | 0x20000000 |   input action        |
+              |            | 0 = release           |
+              |            | 1 = pression          |
+              |------------------------------------|
+              |       Specific Informations        |
+
+              Figure 14. Input Packet Infos Description
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Garyga                       Experimental                      [page 11]  //LINE 641
+
+RFC 0000                        GMGP                           July 2010
+
+
+              |      Common informations           |
+              |------------------------------------|
+              | 0x1FFFFFFF | Key Value             |
+              |            | (see section 8)       |
+              --------------------------------------
+
+        Figure 15. Keyboard Input Packet Infos Description
+
+
+
+
+              |      Common informations           |
+              |------------------------------------|
+              | 0x1F000000 | Button Value          |
+              |            | (see section 9)       |
+              |------------------------------------|
+              | 0x00FFF000 | X coordinates         |
+              |------------------------------------|
+              | 0x00000FFF | Y coordinates         |
+              --------------------------------------
+
+        Figure 16. Mouse Input Packet Infos Description
+
+
+
+
+              --------------------------------------
+              | 0x80000000 |         1             |
+              |------------------------------------|
+              | 0x00FFFF00 | Parameters Mask       |
+              |            | (not used yet)        |
+              |------------------------------------|
+              | 0x000000FF | Items Count           |
+              --------------------------------------
+
+        Figure 17. Confirmation Packet Infos Description
+
+
+
+
+
+              |              Head                  |
+              |------------------------------------| \
+              | uint16 | Item ID                   |  |> * Items Count
+              -------------------------------------- /
+
+        Figure 18. Confirmation Additional Infos Description
+
+
+
+
+Garyga                       Experimental                      [page 12]  //LINE 697
+
+RFC 0000                        GMGP                           July 2010
+
+
+5.2. UDP Server To Client Packet Description
+
+   The UDP packets sent by the server carry the display and sound
+   informations.
+   Each UDP datagram MAY contain a large amount of these packets.
+   Each packet SHOULD contain the current server time, so the client
+   might be able to synchronise his display.
+
+   Each packet contains a "parameters mask", coded on two bytes.
+   After this mask, are each of the "active" parameters, in the order
+   they are encountered in the mask description. (strongest bit first)
+   See Figures 19 and 20.
+
+
+              --------------------------------------
+              | uint32 | Server Time               |
+              |------------------------------------|
+              | uint8  | Items Count               |
+              |------------------------------------| \
+              | uint32 | Item ID                   |  |> * Items Count
+              |------------------------------------| /
+              | uint16 | Parameters Mask           |
+              --------------------------------------
+
+        Figure 19. server-to-client UDP Packet Description
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Garyga                       Experimental                      [page 13]  //LINE 753
+
+RFC 0000                        GMGP                           July 2010
+
+
+           bit         Meaning                         Type
+        ------------------------------------------------------
+        | 0x8000 | Resource ID                      | uint16 |
+        |----------------------------------------------------|
+        | 0x4000 | X Position                       | float  |
+        |----------------------------------------------------|
+        | 0x2000 | Y Position                       | float  |
+        |----------------------------------------------------|
+        | 0x1000 | X Speed (pixel / s)              | float  |
+        |----------------------------------------------------|
+        | 0x0800 | Y Speed (pixel / s)              | float  |
+        |----------------------------------------------------|
+        | 0x0400 | X Acceleration (pixel / s / s)   | float  |
+        |----------------------------------------------------|
+        | 0x0200 | Y Acceleration (pixel / s / s)   | float  |
+        |----------------------------------------------------|
+        | 0x0100 | Life Time (ms)                   | uint16 |
+        |----------------------------------------------------|
+        | 0x0080 | Life Time in Cycles              | uint8  |
+        |----------------------------------------------------|
+        | 0x0040 | Does the Sprite Disappear if it  |  N/C   |
+        |        | Falls off the Screen             |        |
+        |----------------------------------------------------|
+        | 0x0020 | Z axis position                  | uint8  |
+        |        |    0 = Background                |        |
+        |        |  255 = Foreground                |        |
+        |----------------------------------------------------|
+        | 0x0010 | Blinking Delay (ms)              | uint16 |
+        |----------------------------------------------------|
+        | 0x0008 | Does the Sprite Follow The Mouse |  N/C   |
+        |----------------------------------------------------|
+        | 0x0004 | Response Requirement             |  N/C   |
+        |----------------------------------------------------|
+        | 0x0002 | Starting Frame Offset            | uint16 |
+        |----------------------------------------------------|
+        | 0x0001 | Lua file resource ID             | uint16 |
+        ------------------------------------------------------
+
+              Figure 20. Parameters mask description
+
+
+
+
+
+
+
+
+
+
+
+
+Garyga                       Experimental                      [page 14]  //LINE 809
+
+RFC 0000                        GMGP                           July 2010
+
+
+6. Security Considerations
+
+   There is no account management in GMGP, so no need to hide passwords
+   or whatever.
+
+   Plus, since the GMGP client sends only its key inputs, it is
+   impossible to cheat in games by bypassing some unsecured stuff in
+   the protocol.
+
+   GMGP TCP servers are vulnerable to common TCP denial-of-service
+   attacks.  Servers SHOULD take steps to minimize the impact of a
+   denial-of-service attack using combinations of easily implemented
+   solutions technology and border router filters to restrict inbound
+   server access to known, trusted clients.
+
+
+7. Packet Details
+
+   -Strings:
+     Packet MUST contain its size, followed by its content.
+     See Figure 21.
+
+
+              --------------------------------------
+              | uint16  |     Size (N)             |
+              |------------------------------------|
+              | int8[N] |     Content              |
+              --------------------------------------
+
+                 Figure 21. String description
+
+
+8. Keyboard Definition
+
+                     Key           Value
+                    ---------------------------
+                    |A            | 'a'       |
+                    |-------------------------|
+                    |B            | 'b'       |
+                    |-------------------------|
+                    |C            | 'c'       |
+                    |-------------------------|
+                    |D            | 'd'       |
+                    |-------------------------|
+                    |E            | 'e'       |
+                    |-------------------------|
+                    |F            | 'f'       |
+                    |-------------------------|
+                    |G            | 'g'       |
+                    ---------------------------
+
+Garyga                       Experimental                      [page 15]  //LINE 865
+
+RFC 0000                        GMGP                           July 2010
+
+8. Keyboard Definition (continued)
+
+                     Key           Value
+                    ---------------------------
+                    |H            | 'h'       |
+                    |-------------------------|
+                    |I            | 'i'       |
+                    |-------------------------|
+                    |J            | 'j'       |
+                    |-------------------------|
+                    |K            | 'k'       |
+                    |-------------------------|
+                    |L            | 'l'       |
+                    |-------------------------|
+                    |M            | 'm'       |
+                    |-------------------------|
+                    |N            | 'n'       |
+                    |-------------------------|
+                    |O            | 'o'       |
+                    |-------------------------|
+                    |P            | 'p'       |
+                    |-------------------------|
+                    |Q            | 'q'       |
+                    |-------------------------|
+                    |R            | 'r'       |
+                    |-------------------------|
+                    |S            | 's'       |
+                    |-------------------------|
+                    |T            | 't'       |
+                    |-------------------------|
+                    |U            | 'u'       |
+                    |-------------------------|
+                    |V            | 'v'       |
+                    |-------------------------|
+                    |W            | 'w'       |
+                    |-------------------------|
+                    |X            | 'x'       |
+                    |-------------------------|
+                    |Y            | 'y'       |
+                    |-------------------------|
+                    |Z            | 'z'       |
+                    |-------------------------|
+                    |0            | '0'       |
+                    |-------------------------|
+                    |1            | '1'       |
+                    |-------------------------|
+                    |2            | '2'       |
+                    |-------------------------|
+                    |3            | '3'       |
+                    ---------------------------
+
+
+Garyga                       Experimental                      [page 16]  //LINE 921
+
+RFC 0000                        GMGP                           July 2010
+
+8. Keyboard Definition (continued)
+
+                     Key           Value
+                    ---------------------------
+                    |4            | '4'       |
+                    |-------------------------|
+                    |5            | '5'       |
+                    |-------------------------|
+                    |6            | '6'       |
+                    |-------------------------|
+                    |7            | '7'       |
+                    |-------------------------|
+                    |8            | '8'       |
+                    |-------------------------|
+                    |9            | '9'       |
+                    |-------------------------|
+                    |Escape       | 256       |
+                    |-------------------------|
+                    |Left Control | 312       |
+                    |-------------------------|
+                    |Left Shift   | 314       |
+                    |-------------------------|
+                    |Left Alt     | 1000      |
+                    |-------------------------|
+                    |Left System  | 1005      |
+                    |-------------------------|
+                    |Right Control| 789       |
+                    |-------------------------|
+                    |Right Shift  | 1024      |
+                    |-------------------------|
+                    |Right Alt    | 545       |
+                    |-------------------------|
+                    |Right System | 899       |
+                    |-------------------------|
+                    |Menu         | 898       |
+                    |-------------------------|
+                    |Left Bracket | 897       |
+                    |-------------------------|
+                    |Right Bracket| 900       |
+                    |-------------------------|
+                    |SemiColon    | 2000      |
+                    |-------------------------|
+                    |Comma        | 2001      |
+                    |-------------------------|
+                    |Period       | 2002      |
+                    |-------------------------|
+                    |Quote        | 3040      |
+                    |-------------------------|
+                    |Slash        | 4000      |
+                    ---------------------------
+
+
+Garyga                       Experimental                      [page 17]  //LINE 977
+
+RFC 0000                        GMGP                           July 2010
+
+8. Keyboard Definition (continued)
+
+                     Key           Value
+                    ---------------------------
+                    |BackSlash    | 4001      |
+                    |-------------------------|
+                    |Tilde        | 4005      |
+                    |-------------------------|
+                    |Equal        | 3333      |
+                    |-------------------------|
+                    |Dash         | 2222      |
+                    |-------------------------|
+                    |Space        | 1111      |
+                    |-------------------------|
+                    |Return       | 11111     |
+                    |-------------------------|
+                    |Back         | 8000      |
+                    |-------------------------|
+                    |Tab          | 9000      |
+                    |-------------------------|
+                    |Page Up      | 9100      |
+                    |-------------------------|
+                    |Page Down    | 9200      |
+                    |-------------------------|
+                    |End          | 9300      |
+                    |-------------------------|
+                    |Home         | 9400      |
+                    |-------------------------|
+                    |Insert       | 9500      |
+                    |-------------------------|
+                    |Delete       | 9600      |
+                    |-------------------------|
+                    |Add          | 9700      |
+                    |-------------------------|
+                    |Subtract     | 9800      |
+                    |-------------------------|
+                    |Multiply     | 9900      |
+                    |-------------------------|
+                    |Divide       | 10001     |
+                    |-------------------------|
+                    |Left         | 10002     |
+                    |-------------------------|
+                    |Right        | 9801      |
+                    |-------------------------|
+                    |Up           | 9802      |
+                    |-------------------------|
+                    |Down         | 9803      |
+                    |-------------------------|
+                    |Numpad 0     | 9084      |
+                    ---------------------------
+
+
+Garyga                       Experimental                      [page 18]  //LINE 1033
+
+RFC 0000                        GMGP                           July 2010
+
+8. Keyboard Definition (continued)
+
+                     Key           Value
+                    ---------------------------
+                    |Numpad 1     | 9085      |
+                    |-------------------------|
+                    |Numpad 2     | 6000      |
+                    |-------------------------|
+                    |Numpad 3     | 6100      |
+                    |-------------------------|
+                    |Numpad 4     | 6101      |
+                    |-------------------------|
+                    |Numpad 5     | 6102      |
+                    |-------------------------|
+                    |Numpad 6     | 6103      |
+                    |-------------------------|
+                    |Numpad 7     | 6104      |
+                    |-------------------------|
+                    |Numpad 8     | 6500      |
+                    |-------------------------|
+                    |Numpad 9     | 6600      |
+                    |-------------------------|
+                    |F1           | 6666      |
+                    |-------------------------|
+                    |F2           | 6667      |
+                    |-------------------------|
+                    |F3           | 6668      |
+                    |-------------------------|
+                    |F4           | 6669      |
+                    |-------------------------|
+                    |F5           | 6610      |
+                    |-------------------------|
+                    |F6           | 6611      |
+                    |-------------------------|
+                    |F7           | 6700      |
+                    |-------------------------|
+                    |F8           | 6701      |
+                    |-------------------------|
+                    |F9           | 6709      |
+                    |-------------------------|
+                    |F10          | 6800      |
+                    |-------------------------|
+                    |F11          | 6801      |
+                    |-------------------------|
+                    |F12          | 6888      |
+                    |-------------------------|
+                    |F13          | 1000000   |
+                    |-------------------------|
+                    |F14          | 1000001   |
+                    ---------------------------
+
+
+Garyga                       Experimental                      [page 19]  //LINE 1089
+
+RFC 0000                        GMGP                           July 2010
+
+8. Keyboard Definition (continued)
+
+                     Key           Value
+                    ---------------------------
+                    |F15          | 1234234   |
+                    |-------------------------|
+                    |Pause        | 234289    |
+                    |-------------------------|
+                    |Joystick 0   | 7000      |
+                    |-------------------------|
+                    |Joystick 1   | 7001      |
+                    |-------------------------|
+                    |Joystick 2   | 7002      |
+                    |-------------------------|
+                    |Joystick 3   | 7003      |
+                    |-------------------------|
+                    |Joystick 4   | 7004      |
+                    |-------------------------|
+                    |Joystick 5   | 7005      |
+                    |-------------------------|
+                    |Joystick 6   | 7006      |
+                    |-------------------------|
+                    |Joystick 7   | 7007      |
+                    |-------------------------|
+                    |Joystick 8   | 7008      |
+                    |-------------------------|
+                    |Joystick 9   | 7009      |
+                    |-------------------------|
+                    |Joystick 10  | 7010      |
+                    |-------------------------|
+                    |Joystick 11  | 7011      |
+                    |-------------------------|
+                    |Joystick 12  | 7012      |
+                    |-------------------------|
+                    |Joystick 13  | 7013      |
+                    |-------------------------|
+                    |Joystick 14  | 7014      |
+                    |-------------------------|
+                    |Joystick 15  | 7015      |
+                    ---------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+Garyga                       Experimental                      [page 20]  //LINE 1145
+
+RFC 0000                        GMGP                           July 2010
+
+
+9. Mouse Definition
+
+                     Button         Value
+                    ---------------------------
+                    |Left         | 0         |
+                    |-------------------------|
+                    |Right        | 1         |
+                    |-------------------------|
+                    |Middle       | 2         |
+                    |-------------------------|
+                    |Button 4     | 3         |
+                    |-------------------------|
+                    |Button 5     | 4         |
+                    ---------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Garyga                       Experimental                      [page 21]  //LINE 1201
+
+

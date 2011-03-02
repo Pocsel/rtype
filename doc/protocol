@@ -1,0 +1,123 @@
+UDP
+
+Server -> Client
+
+[
+uint32 time
+uint8 nbSprites
+uint16 id_sprite * nbSprites
+uint16 actions_mask :
+- id image : uint16
+- positionx : float
+- positiony : float
+- vitessex : float
+- vitessey : float
+- accelx : float
+- accely : float
+- duree de vie en ms : uint16
+- duree de vie en cycle d'animation / nombre de repetitions : uint8
+- est-ce que le sprite disparait s'il sort de l'ecran : rien
+- Z : uint8 (+ c'est grand, + c'est affiche pres de ta gueule)
+- delay de clignotement en ms : uint16
+- suit la souris : rien
+- require response : rien
+- RESERVE POUR PLUS TARD
+- RESERVE POUR PLUS TARD
+]+
+
+Client -> Server
+
+uint16 id_client
+
+uint32 :
+  - 0x80000000 -> 0 = input / 1 = multimedia response
+
+INPUT: (sur le meme uint32)
+  - 0x40000000 -> 0 = keyboard / 1 = mouse
+    0x20000000 -> 1 = pression / 0 = relachement
+
+  -> keyboard
+     0x1FFFFFFF -> key
+
+  -> mouse 0x00000FFF coord Y
+           0x00FFF000 coord X
+           0x1F000000 button
+
+
+multimedia RESPONSE :
+ 0x00FFFF00 -> action mask
+ 0x000000FF -> nb sprites
+ uint16 id_sprite * nbSprites
+
+
+TCP
+
+uint16 packet size
+uint8 packet type
+
+types :
+ C -> S
+    - Hello server
+ S -> C
+    - Hello client + ihavethis-header
+ S -> C
+    - ihavethis-item  (id + type + filepath + otherinfos)
+ C -> S
+    - ineedthis-item (id)
+ C -> S
+    - ok to start game
+
+ S -> C
+    - file-header (id + nbBytes)
+    - file-item
+
+ S -> C
+    - game params (resolution)
+
+    - ping
+    - pong
+
+
+    Hello Server :
+    - super magic str ("hallal_a = etudiant close") : str
+    - pseudo : str (limite a 10 caracteres)
+
+    Hello client / ihavethis-header
+    - id client : uint16
+    - nb_items : uint16
+
+    ihavethis-item
+    - id_item : uint16
+    - type : uint8 (audio / texture)
+    - filepath : str
+    - otherinfos :
+       - audio :
+          - repeat : bool (uint8)
+       - texture :
+          - nb_imgs : uint16
+          - framedelay : uint16 (ms) (0 for not animated)
+          - vertical : bool (uint8)
+
+    ineedthis-item
+    - id_item : uint16
+
+    ok to start game
+    - port udp : uint16
+
+    file-header
+    - id : uint16
+    - nbBytes : uint32
+
+    file-item
+    - les data
+
+    game params
+    - resolutionx : uint16
+    - resolutiony : uint16
+    - UDP Port : uint16
+
+    ping
+    - str : str
+
+    pong
+    - str : str

@@ -1,0 +1,131 @@
+TEMPLATE = lib
+TARGET = bam
+CONFIG += warn_on
+
+QMAKE_CXXFLAGS_DEBUG += -DDEBUG
+
+unix {
+    CONFIG += plugin
+    DESTDIR = ..
+    QMAKE_CFLAGS_SHLIB = -fPIC -Wall -Wextra -include stdint.h -include cstdlib
+    QMAKE_CXXFLAGS_SHLIB = -fPIC -Wall -Wextra -include stdint.h -include cstdlib
+}
+
+win32 {
+    CONFIG += dll
+    debug:DESTDIR  = ./debug
+    release:DESTDIR  = ./release
+    LIBS = -lws2_32
+    DEFINES -= UNICODE
+    INCLUDEPATH += ../../../windows
+    QMAKE_CXXFLAGS = "/FI Types.hpp" "/Fo.\\objs\\$(ConfigurationName)\\" "/Fd.\\objs\\$(ConfigurationName)\\"
+
+    QMAKE_POST_LINK = "copy \"$(TargetPath)\" ..\\"
+}
+
+INCLUDEPATH += ../common \
+               ../../../common \
+               ../../../b00st \
+               ../../networkabstract \
+               ../../threadsabstract \
+               ../../logic \
+               ../ \
+
+#
+# Common
+#
+HEADERS += \
+            ../AResourceInfo.hpp \
+            ../IGame.hpp \
+            ../IServerProxy.hpp \
+
+SOURCES += \
+            ../AResourceInfo.cpp \
+
+
+HEADERS += \
+            ../common/AInteraction.hpp \
+            ../common/AnimationResourceInfo.hpp \
+            ../common/BasicGame.hpp \
+            ../common/BasicPlayer.hpp \
+            ../common/Circle.hpp \
+            ../common/Clock.hpp \
+            ../common/EntityManager.hpp \
+            ../common/InteractionManager.hpp \
+            ../common/Item.hpp \
+            ../common/ItemManager.hpp \
+            ../common/LuaResourceInfo.hpp \
+            ../common/PlayerManager.hpp \
+            ../common/Point.hpp \
+            ../common/QuadTree.hpp \
+            ../common/Rect.hpp \
+            ../common/ResourceManager.hpp \
+            ../common/Shape.hpp \
+            ../common/SoundResourceInfo.hpp \
+
+SOURCES += \
+            ../common/AnimationResourceInfo.cpp \
+            ../common/BasicPlayer.cpp \
+            ../common/Circle.cpp \
+            ../common/Clock.cpp \
+            ../common/Item.cpp \
+            ../common/LuaResourceInfo.cpp \
+            ../common/Point.cpp \
+            ../common/Rect.cpp \
+            ../common/Shape.cpp \
+            ../common/SoundResourceInfo.cpp \
+
+
+
+HEADERS += \
+            ../../threadsabstract/Mutex.hpp \
+            ../../threadsabstract/ScopeLock.hpp \
+            ../../threadsabstract/Thread.hpp \
+
+SOURCES += \
+            ../../threadsabstract/Mutex.cpp \
+            ../../threadsabstract/Thread.cpp \
+
+
+HEADERS += \
+            ../../../common/Constants.hpp \
+            ../../../common/Log.hpp \
+            ../../../common/Packet.hpp \
+            ../../../common/String.hpp \
+
+SOURCES += \
+            ../../../common/Packet.cpp \
+            ../../../common/String.cpp \
+
+#
+# Game
+#
+
+HEADERS += \
+            ButtonEntity.hpp \
+            Decorator.hpp \
+            GameEntity.hpp \
+            Game.hpp \
+            GamePlayer.hpp \
+            MainGame.hpp \
+            MainMenuEntity.hpp \
+            MenuEntity.hpp \
+            MenuPlayer.hpp \
+            PlayerEntity.hpp \
+            Resources.hpp \
+            RoomEntity.hpp \
+            TextEntity.hpp \
+
+SOURCES += \
+            ButtonEntity.cpp \
+            Game.cpp \
+            GameEntity.cpp \
+            GamePlayer.cpp \
+            GetGameInstance.cpp \
+            MainGame.cpp \
+            MainMenuEntity.cpp \
+            MenuEntity.cpp \
+            MenuPlayer.cpp \
+            PlayerEntity.cpp \
+            RoomEntity.cpp \
+

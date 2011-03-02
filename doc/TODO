@@ -1,0 +1,86 @@
+TERMINAL
+{
+    TODO | Virer les map et mettre des vector a la place pour faire plaisir aux koalas du gdl
+
+}
+
+SERVER
+{
+
+    SERVER
+    {
+             |    free tout bien au ctrl-C
+
+        TODO |    DEADLOCK (join lock ?) au ctrl-C
+
+    }
+
+    GAMES_COMMON
+    {
+             |    QUADTREE : changer le fait qu'il soit un gouffre a performances
+
+    }
+
+    PONG
+    {
+        TODO |    corriger la collision foireuse
+
+    }
+
+    RTYPE
+    {
+             |    force : faire quelque chose pour pas envoyer 10000 packets
+             |    a chaque deplacement quand elle est accrochée au joueur
+
+             |    force : des niveaux pour la force
+
+             |    force : ne plus pouvoir se la voler
+
+             |    force : faire les armes speciales (+ les bulletentity correspondant)
+
+             |    garbage spawner : collision par cercle avant le trigger,
+             |    par rectangle ensuite (maxi classe)
+             |    (abandon de ca, c'est useless)
+
+             |    BIG TODO : des maps, des monstres aux deplacements pas aleatoires, des boss
+             |
+
+             | ShipEntity : Speed Bonus !
+
+        TODO | SUPER IMPORTANT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+             |  corriger le segfault quand un client quitte :)
+             |
+             |  EN FAIT : ENTITYMANAGER : CLEAN ENTITIES (sans que ca segfault :) )
+
+             | Reverse mobs
+
+        TODO | WaterEntity (la cascade)
+
+        TODO | map1 + map2 (normal)
+
+             | Endurance : du level d'endurance (et rendre le truc plus progressif)
+
+             | Force : corriger le bug (quand elle se retire suite a un deplacement hors de l'ecran, seul son porteur peut interagir avec elle)
+
+        TODO | des TODO
+
+        TODO | un timer dans les endurance
+
+        TODO | le nom de map dans les normal
+
+             | NOUVEAU MOB : bonus carrier !
+
+    }
+
+}
+
+
+utilisation de la TODOLIST :
+
+pour rajouter un truc :
+ TODO | le truc
+
+pour le retirer :
+      | le truc
+
+comme ca on evite (un peu) les conflits de versionning machin truc

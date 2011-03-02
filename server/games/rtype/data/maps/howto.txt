@@ -1,0 +1,26 @@
+Char | Spawns
+----------------------------------------
+[    | Low wall down
+]    | Low wall up
+<    | High wall down
+>    | High wall up
+/    | Low green wall down
+\    | Low green wall up
+(    | High green wall down
+)    | High green wall up
+{    | Garbage spawner down
+}    | Garbage spawner up
+m    | Moving missile launcher (low)
+M    | Moving missile launcher (high)
+t    | Fixed missile launcher (low)
+T    | Fixed missile launcher (high)
+w    | Weak mob
+r    | Little robot mob (front)
+a    | Little robot mob (back)
+0    | Force bonus
+1    | Speed bonus
+2    | Missile bonus
+3    | Flame bonus
+4    | Laser bonus
+5    | DNA bonus
+!    | Boss 1

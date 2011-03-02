@@ -1,0 +1,9 @@
+<RCC>
+  <qresource prefix="resources">
+    <file>arrow_rotate_anticlockwise.png</file>
+    <file>control_play_blue.png</file>
+    <file>cross.png</file>
+    <file>disconnect.png</file>
+    <file>server.png</file>
+  </qresource>
+</RCC>

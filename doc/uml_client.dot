@@ -1,0 +1,627 @@
+digraph ta_soeur_en_claquettes
+{
+    fontname = "Bitstream sans Vera"
+    compound = true;
+    ranksep = 1.25;
+    rankdir = BT;
+    label = "Generic Multiplayer Gaming P";
+    fontsize = 24;
+
+    node
+    [
+        fontname = "Monaco"
+        fontsize = 8
+        shape = "record"
+        style = filled
+        fillcolor = white
+    ]
+
+    edge
+    [
+        fontname = "Monaco"
+        fontsize = 8
+    ]
+
+
+/* Common */
+    subgraph cluster_Common
+    {
+        label = "Common"
+        fontsize = 24;
+
+        cm_Packet
+        [
+    label="{\
+Packet\
+|\
+- _data: char*\l\
+- _size: size_t\l\
+- _allocSize: size_t\l\
+- _offset: mutable size_t\l\
+|\
++ Packet()\l\
++ Packet(packet: Packet const&)\l\
++ ~Packet()\l\
+- _WriteSize(): void\l\
+- _WriteByte(byte: char): void\l\
+- _Resize(target: size_t): void\l\
++ operator =(packet: Packet const&): Packet&\l\
++ BytesLeft() const: size_t\l\
++ Clear(): void\l\
++ WriteData(data: char*, size: size_t): void\l\
++ Write8(val: uint8_t): void\l\
++ Write16(val: uint16_t): void\l\
++ Write32(val: uint32_t): void\l\
++ WriteFloat(val: float): void\l\
++ WriteString(val: String const&): void\l\
++ Read8() const: uint8_t\l\
++ Read16() const: uint16_t\l\
++ Read32() const: uint32_t\l\
++ ReadFloat() const: float\l\
++ ReadString() const: String\l\
++ GetSize() const: size_t\l\
++ GetCompleteSize() const: size_t\l\
++ GetData() const: char const*\l\
++ GetCompleteData() const: char const*\l\
++ Dump() const: void\l\
+}"
+        ]
+
+        cm_String
+        [
+    label="{\
+String\
+|\
+- \<\<static\>\> _whitespaces: std::string const\l\
+|\
++ String()\l\
++ String(str: std::string const&)\l\
++ String(str: char const*)\l\
++ String(s: String const&)\l\
++ String(val: T const&): template\<typename T\>\l\
++ operator \>\>(val: T&): template\<typename T\> String&\l\
++ operator +(val: T const&) const: template\<typename T\> String\l\
++ operator +=(val: T const&): template\<typename T\> String&\l\
++ ltrim(whitespaces: std::string const&): void\l\
+}"
+        ]
+
+        cm_Log
+        [
+    label="{\
+Log\
+|\
+|\
++ \<\<static\>\> D(message: String const&): void\l\
++ \<\<static\>\> I(message: String const&): void\l\
++ \<\<static\>\> W(message: String const&): void\l\
++ \<\<static\>\> E(message: String const&): void\l\
+}"
+        ]
+
+        cm_Singleton
+        [
+            label = "Singleton"
+        ]
+
+    }
+
+
+/* Client */
+    subgraph cluster_Client
+    {
+        label = "Client"
+        fontsize = 24
+
+    /* Libraries */
+        subgraph cluster_Lib
+        {
+            label = "Libraries"
+            fontsize = 16;
+
+    /* Qt */
+            subgraph cluster_Qt
+            {
+                label = "Qt"
+                fontsize = 13;
+
+                qt_QMainWindow [ label = "QMainWindow" ]
+                qt_QThread [ label = "QThread" ]
+            }
+
+    /* Sfml */
+            subgraph cluster_SFML
+            {
+                label = "SFML"
+                fontsize = 13;
+
+                sf_NonCopyable [ label = "sf::NonCopyable" ]
+                sf_Image [ label = "sf::Image" ]
+                sf_Sound [ label = "sf::Sound" ]
+            }
+        }
+
+/* Base */
+        cl_Terminal
+        [
+    label="{\
+Terminal\
+|\
+- _app: QApplication\l\
+- _network: INetwork*\l\
+- _updaterWindow: UpdaterWindow*\l\
+- _connectionWindow: ConnectionWindow*\l\
+- _gameView: IGameView*\l\
+- _mutex: QMutex\l\
+|\
++ Terminal(ac: int, av: char**)\l\
++ ~Terminal()\l\
++ Run(): int\l\
++ InformUser(message: String const&) const: void\l\
++ GetNetwork(): INetwork*\l\
++ GetUpdaterWindow(): UpdaterWindow*\l\
++ GetConnectionWindow(): ConnectionWindow*\l\
++ GetGameView(): IGameView*\l\
++ CloseWindows(): void\l\
+}"
+        ]
+
+/* Network */
+        cl_INetwork
+        [
+    label="{\
+INetwork\
+|\
+|\
++ \<\<virtual\>\> ~INetwork()\l\
++ \<\<abstract\>\> Connect(ip: String const&, port: unsigned short): void\l\
++ \<\<abstract\>\> GetHost() const: String const&\l\
++ \<\<abstract\>\> SendTcpPacket(packet: Packet const&): void\l\
++ \<\<abstract\>\> SendUdpPacket(packet: Packet const&): void\l\
++ \<\<abstract\>\> SetServerUdpPort(port: uint16_t): void\l\
++ \<\<abstract\>\> GetClientId() const: uint16_t\l\
++ \<\<abstract\>\> SetClientId(clientId: uint16_t): void\l\
+}"
+        ]
+
+        cl_QtNetwork
+        [
+    label="{\
+QtNetwork\
+|\
+- _term: Terminal&\l\
+- _socket: QTcpSocket*\l\
+- _udpSocket: QUdpSocket*\l\
+- _packetSize: uint16_t\l\
+- _host: String\l\
+- _serverAddress: QHostAddress\l\
+- _serverUdpPort: quint16\l\
+- _packetManager: TcpPacketManager*\l\
+- _clientId: uint16_t\l\
+|\
++ QtNetwork(term: Terminal&)\l\
++ ~QtNetwork()\l\
++ Connect(ip: String const&, port: unsigned short): void\l\
++ GetHost() const: String const&\l\
++ SendUdpPacket(packet: Packet const&): void\l\
++ SendTcpPacket(packet: Packet const&): void\l\
++ SetServerUdpPort(port: uint16_t): void\l\
++ GetClientId() const: uint16_t\l\
++ SetClientId(clientId: uint16_t): void\l\
+- _SocketReady(): void\l\
+- _SocketConnected(): void\l\
+- _SocketDisconnected(): void\l\
+- _SocketError(error: QAbstractSocket::SocketError): void\l\
+- _UdpSocketReady(): void\l\
+}"
+        ]
+
+        cl_TcpPacketManager
+        [
+    label="{\
+TcpPacketManager\
+|\
+- _handlers: std::map\<uint8_t, handlerMethod\>\l\
+- _term: Terminal&\l\
+- _currentItem: size_t\l\
+- _totalItems: size_t\l\
+- _resources: std::list\<ResourceMetadata*\>\l\
+- _file: QFile\l\
+- _fileSize: size_t\l\
+- _receivedWelcome: bool\l\
+- _receivedResources: bool\l\
+- _downloadingFinished: bool\l\
+|\
++ TcpPacketManager(term: Terminal&)\l\
++ ~TcpPacketManager()\l\
+- _CheckForFinishedDownload(): void\l\
+- _AddResource(meta: ResourceMetadata*): void\l\
+- _RequestResources(): void\l\
+- _PacketIHaveThis(p: Packet const&): void\l\
+- _PacketPleaseComeIn(p: Packet const&): void\l\
+- _PacketTakeIt(p: Packet const&): void\l\
+- _PacketTakeSomeMore(p: Packet const&): void\l\
+- _PacketWatchThisOut(p: Packet const&): void\l\
+- _PacketPing(p: Packet const&): void\l\
++ ProcessPacket(p: Packet const&): void\l\
+}"
+        ]
+
+/* Graphics */
+        cl_SfmlAnimation
+        [
+    label="{\
+SfmlAnimation\
+|\
+- _image: sf::Image\l\
+- _path: String\l\
+- _frames: size_t\l\
+- _delay: size_t\l\
+- _isVertical: bool\l\
+- _loaded: bool\l\
+- _smoothing: bool\l\
+|\
++ SfmlAnimation(path: String const&, frames: size_t, delay: size_t, isVertical: bool, smoothing: bool)\l\
++ ~SfmlAnimation()\l\
++ IsLoaded(): bool\l\
++ Load(): void\l\
++ GetImage(): sf::Image&\l\
++ GetFrames(): size_t\l\
++ GetDelay(): size_t\l\
++ IsVertical(): bool\l\
+}"
+        ]
+
+        cl_SfmlSound
+        [
+    label="{\
+SfmlSound\
+|\
+- _path: String\l\
+- _isMusic: bool\l\
+- _loaded: bool\l\
+- _buffer: sf::SoundBuffer\l\
+|\
++ SfmlSound(path: String const&, isMusic: bool)\l\
++ ~SfmlSound()\l\
++ IsLoaded(): bool\l\
++ Load(): void\l\
++ IsMusic(): bool\l\
++ GetSoundBuffer(): sf::SoundBuffer&\l\
++ GetPath(): String const&\l\
+}"
+        ]
+
+        cl_SfmlRenderer
+        [
+    label="{\
+SfmlRenderer\
+|\
+- _view: SfmlGameView&\l\
+- _items: std::map\<size_t, IItem*\>\l\
+- _layers: std::map\<size_t, std::list\<IItem*\>\>\l\
+- _killPool: std::list\<IItem*\>\l\
+- _width: size_t\l\
+- _height: size_t\l\
+- _mouseX: float\l\
+- _mouseY: float\l\
+|\
++ SfmlRenderer(view: SfmlGameView&)\l\
++ ~SfmlRenderer()\l\
+- _ProcessKillPool(): void\l\
+- _RemoveAllItems(): void\l\
++ Render(app: sf::RenderWindow*, time: float): void\l\
++ ProcessPacket(p: Packet const&): void\l\
++ AddItem(item: IItem*, pos: size_t): void\l\
++ RemoveItem(item: IItem*, pos: size_t): void\l\
++ DeleteItem(item: IItem*): void\l\
++ SetSize(width: size_t, height: size_t): void\l\
++ SetMousePos(x: float, y: float): void\l\
++ GetWidth() const: size_t\l\
++ GetHeight() const: size_t\l\
++ GetMouseX() const: float\l\
++ GetMouseY() const: float\l\
+}"
+        ]
+
+        cl_IItem
+        [
+    label="{\
+IItem\
+|\
+|\
++ \<\<virtual\>\> ~IItem()\l\
++ \<\<abstract\>\> Render(app: sf::RenderWindow*, time: float): void\l\
++ \<\<abstract\>\> SetResourceId(id: size_t): void\l\
++ \<\<abstract\>\> SetPositionX(pos: float): void\l\
++ \<\<abstract\>\> SetPositionY(pos: float): void\l\
++ \<\<abstract\>\> SetSpeedX(speed: float): void\l\
++ \<\<abstract\>\> SetSpeedY(speed: float): void\l\
++ \<\<abstract\>\> SetAccelX(accel: float): void\l\
++ \<\<abstract\>\> SetAccelY(accel: float): void\l\
++ \<\<abstract\>\> SetLifeTimeMs(ms: size_t): void\l\
++ \<\<abstract\>\> SetLifeTimeCycles(cycles: size_t): void\l\
++ \<\<abstract\>\> SetDisapear(enable: bool): void\l\
++ \<\<abstract\>\> SetPositionZ(pos: size_t): void\l\
++ \<\<abstract\>\> SetBlinking(freq: size_t): void\l\
++ \<\<abstract\>\> SetCursor(enable: bool): void\l\
++ \<\<abstract\>\> SetFrame(frame: size_t): void\l\
+}"
+        ]
+
+        cl_SoundItem
+        [
+    label="{\
+SoundItem\
+|\
+- _view: SfmlGameView&\l\
+- _renderer: SfmlRenderer&\l\
+- _resource: SfmlSound*\l\
+- _sound: sf::Sound\l\
+- _music: sf::Music\l\
+- _lifeTimeMs: size_t\l\
+- _lifeTimeCycles: size_t\l\
+- _lifeTimeSet: bool\l\
+- _lifeTime: float\l\
+- _cyclesCounter: size_t\l\
+|\
++ SoundItem(resourceId: size_t, view: SfmlGameView&, renderer: SfmlRenderer&)\l\
++ ~SoundItem()\l\
++ Render(app: sf::RenderWindow*, time: float): void\l\
++ SetResourceId(id: size_t): void\l\
++ SetPositionX(pos: float): void\l\
++ SetPositionY(pos: float): void\l\
++ SetSpeedX(speed: float): void\l\
++ SetSpeedY(speed: float): void\l\
++ SetAccelX(accel: float): void\l\
++ SetAccelY(accel: float): void\l\
++ SetLifeTimeMs(ms: size_t): void\l\
++ SetLifeTimeCycles(cycles: size_t): void\l\
++ SetDisapear(enable: bool): void\l\
++ SetPositionZ(pos: size_t): void\l\
++ SetBlinking(freq: size_t): void\l\
++ SetCursor(enable: bool): void\l\
++ SetFrame(frame: size_t): void\l\
+}"
+        ]
+
+        cl_SpriteItem
+        [
+    label="{\
+SpriteItem\
+|\
+- _view: SfmlGameView&\l\
+- _renderer: SfmlRenderer&\l\
+- _anim: SfmlAnimation*\l\
+- _sprite: sf::Sprite\l\
+- _posZ: size_t\l\
+- _speedX: float\l\
+- _speedY: float\l\
+- _accelX: float\l\
+- _accelY: float\l\
+- _lifeTimeMs: size_t\l\
+- _lifeTimeCycles: size_t\l\
+- _disapear: bool\l\
+- _blinking: size_t\l\
+- _cursor: bool\l\
+- _currentFrame: size_t\l\
+- _lastFrameTime: float\l\
+- _lastBlinkTime: float\l\
+- _blinkDisplay: bool\l\
+- _lifeTimeSet: bool\l\
+- _lifeTime: float\l\
+- _cyclesCounter: size_t\l\
+- _spawned: bool\l\
+|\
++ SpriteItem(resourceId: size_t, view: SfmlGameView&, renderer: SfmlRenderer&)\l\
++ ~SpriteItem()\l\
+- _SetAnimationFrame(frame: size_t): void\l\
+- _GetWidth(): size_t\l\
+- _GetHeight(): size_t\l\
++ Render(app: sf::RenderWindow*, time: float): void\l\
++ SetResourceId(id: size_t): void\l\
++ SetPositionX(pos: float): void\l\
++ SetPositionY(pos: float): void\l\
++ SetSpeedX(speed: float): void\l\
++ SetSpeedY(speed: float): void\l\
++ SetAccelX(accel: float): void\l\
++ SetAccelY(accel: float): void\l\
++ SetLifeTimeMs(ms: size_t): void\l\
++ SetLifeTimeCycles(cycles: size_t): void\l\
++ SetDisapear(enable: bool): void\l\
++ SetPositionZ(pos: size_t): void\l\
++ SetBlinking(freq: size_t): void\l\
++ SetCursor(enable: bool): void\l\
++ SetFrame(frame: size_t): void\l\
+}"
+        ]
+
+        cl_EventManager
+        [
+    label="{\
+EventManager\
+|\
+- _network: INetwork*\l\
+- _mouseX: float\l\
+- _lastMouseX: float\l\
+- _mouseY: float\l\
+- _lastMouseY: float\l\
+- _keyboard: std::map\<int, int\>\l\
+- _mouse: std::map\<int, int\>\l\
+- _keyStatus: bool[sf::Key::Count]\l\
+- _lastTime: float\l\
+|\
++ EventManager(network: INetwork*)\l\
++ ~EventManager()\l\
+- _HandleKeyboardEvent(type: int, code: int): void\l\
+- _HandleMouseEvent(type: int, code: int): void\l\
+- _KeyboardToNet(code: int): int\l\
+- _MouseToNet(code: int): int\l\
++ ProcessEvents(app: sf::RenderWindow*, time: float): void\l\
++ GetMouseX() const: float\l\
++ GetMouseY() const: float\l\
+}"
+        ]
+
+        cl_IGameView
+        [
+    label="{\
+IGameView\
+|\
+|\
++ \<\<virtual\>\> ~IGameView()\l\
++ \<\<abstract\>\> Start(): void\l\
++ \<\<abstract\>\> Stop(): void\l\
++ \<\<abstract\>\> IsRunning() const: bool\l\
++ \<\<abstract\>\> PushData(data: char*, size: size_t): void\l\
++ \<\<abstract\>\> AddAnimation(id: size_t, path: String const&, frames: size_t, delay: size_t, isVertical: bool): void\l\
++ \<\<abstract\>\> AddSound(id: size_t, path: String const&, isMusic: bool): void\l\
++ \<\<abstract\>\> SetResolution(width: size_t, height: size_t): void\l\
++ \<\<abstract\>\> EnableSmoothing(enable: bool): void\l\
++ \<\<abstract\>\> ConfirmItem(id: size_t): void\l\
+}"
+        ]
+
+        cl_SfmlGameView
+        [
+    label="{\
+SfmlGameView\
+|\
+- _term: Terminal&\l\
+- _app: sf::RenderWindow*\l\
+- _frameTimer: QTimer\l\
+- _packets: std::queue\<Packet*\>\l\
+- _animations: std::map\<size_t, SfmlAnimation*\>\l\
+- _sounds: std::map\<size_t, SfmlSound*\>\l\
+- _renderer: SfmlRenderer*\l\
+- _clock: sf::Clock\l\
+- _smoothing: bool\l\
+- _eventManager: EventManager\l\
+- _confirmations: std::queue\<size_t\>\l\
+- _isRunning: bool\l\
+|\
++ SfmlGameView(term: Terminal&)\l\
++ ~SfmlGameView()\l\
+- _Init(): void\l\
+- _Exit(): void\l\
+- _SendConfirmations(): void\l\
+- _RenderFrame(): void\l\
++ Start(): void\l\
++ Stop(): void\l\
++ IsRunning() const: bool\l\
++ PushData(data: char*, size: size_t): void\l\
++ AddAnimation(id: size_t, path: String const&, frames: size_t, delay: size_t, isVertical: bool): void\l\
++ AddSound(id: size_t, path: String const&, isMusic: bool): void\l\
++ SetResolution(width: size_t, height: size_t): void\l\
++ EnableSmoothing(enable: bool): void\l\
++ ConfirmItem(id: size_t): void\l\
++ GetAnimation(id: size_t): SfmlAnimation*\l\
++ GetSound(id: size_t): SfmlSound*\l\
+}"
+        ]
+
+/* Windows */
+        subgraph cluster_QtGeneratedClasses
+        {
+            label = "Qt Generated Classes"
+            fontsize = 16;
+
+            cl_UiUpdater
+            [
+                label = "{ Ui::Updater }"
+            ]
+
+            cl_UiConnection
+            [
+                label = "{ Ui::Connection }"
+            ]
+        }
+
+        cl_UpdaterWindow
+        [
+    label="{\
+UpdaterWindow\
+|\
+- _term: Terminal&\l\
+|\
++ UpdaterWindow(term: Terminal&)\l\
++ ~UpdaterWindow()\l\
+- keyPressEvent(e: QKeyEvent*): void\l\
+- on_cancelPushButton_clicked(): void\l\
+- on_playPushButton_clicked(): void\l\
+- on_enableSmoothingCheckBox_stateChanged(state: int): void\l\
++ AddMessage(message: String const&): void\l\
++ EnablePlay(enable: bool): void\l\
++ SetTotalBar(val: int): void\l\
++ SetCurrentBar(val: int): void\l\
++ SetStatus(status: String const&): void\l\
+}"
+        ]
+        cl_UpdaterWindow -> qt_QMainWindow
+        cl_UpdaterWindow -> cl_UiUpdater
+
+        cl_ConnectionWindow
+        [
+    label="{\
+ConnectionWindow\
+|\
+- _term: Terminal&\l\
+|\
++ ConnectionWindow(term: Terminal&)\l\
++ ~ConnectionWindow()\l\
+- keyPressEvent(e: QKeyEvent*): void\l\
+- _ReadInfos(): void\l\
+- _WriteInfos() const: void\l\
+- on_okPushButton_clicked(): void\l\
+- on_quitPushButton_clicked(): void\l\
++ EnableConnection(enable: bool): void\l\
++ GetNickname() const: String\l\
+}"
+        ]
+        cl_ConnectionWindow -> qt_QMainWindow
+        cl_ConnectionWindow -> cl_UiConnection
+
+
+        cl_SfmlGameView -> cl_IGameView
+        cl_SfmlGameView -> sf_NonCopyable
+        cl_SfmlRenderer -> cl_SfmlGameView [arrowhead = diamond]
+        cl_SfmlAnimation -> cl_SfmlGameView [arrowhead = odiamond headlabel = "0..n"]
+        cl_SfmlSound -> cl_SfmlGameView [arrowhead = odiamond headlabel = "0..n"]
+        cl_EventManager -> cl_SfmlGameView [arrowhead = diamond]
+        cl_EventManager -> sf_NonCopyable
+        cl_SpriteItem -> cl_IItem
+        cl_SfmlAnimation -> cl_SpriteItem [arrowhead = diamond]
+        cl_SoundItem -> cl_IItem
+        cl_SfmlSound -> cl_SoundItem [arrowhead = diamond]
+        cl_SfmlRenderer -> sf_NonCopyable
+        cl_SfmlGameView -> cl_SfmlRenderer [arrowhead = diamond]
+        cl_IItem -> cl_SfmlRenderer [arrowhead = odiamond headlabel = "0..n"]
+        sf_Sound -> cl_SfmlSound [arrowhead = diamond]
+        sf_Image -> cl_SfmlAnimation [arrowhead = diamond]
+        cl_QtNetwork -> cl_INetwork
+        cl_TcpPacketManager -> cl_QtNetwork [arrowhead = diamond]
+        cl_Terminal -> sf_NonCopyable
+        cl_INetwork -> cl_Terminal [arrowhead = diamond]
+        cl_UpdaterWindow -> cl_Terminal [arrowhead = diamond]
+        cl_ConnectionWindow -> cl_Terminal [arrowhead = diamond]
+        cl_IGameView -> cl_Terminal [arrowhead = diamond]
+
+
+    }
+
+
+
+}
+
+/*
+Trucs utiles:
+- heritage: parent -> child
+- membre: child -> parent [arrowhead = diamond]
+- agregation: child -> parent [arrowhead = odiamond]
+- invisible:
+    parent -> child
+    [
+        style = invisible
+        arrowhead = none
+    ]
+*/

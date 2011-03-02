@@ -1,0 +1,94 @@
+digraph G {
+    fontname = "Bitstream sans Vera"
+    compound = true;
+    ranksep = 1.25;
+    rankdir = BT;
+    label = "Threads Abstraction";
+    fontsize = 24;
+
+    node [
+        fontname = "Monaco"
+        fontsize = 8
+        shape = "record"
+        style = filled
+        fillcolor = white
+    ]
+
+    edge [
+        fontname = "Monaco"
+        fontsize = 8
+    ]
+
+
+      IThread [
+    label="{\
+IThread\
+|\
+|\
++ \<\<virtual\>\> ~IThread()\l\
++ \<\<abstract\>\> Quit(): void\l\
++ \<\<abstract\>\> Join(): void\l\
+}"
+    ]
+
+     Thread [
+        label = "{\
+Thread\
+|\
+- _thread: Thread_t*\l\
+- _joined: bool\l\
+- _functor: FUNCTOR\l\
+- _Run(IThreadObject*): void*\l\
+|\
++ Thread(functor: FUNCTOR const&)\l\
++ ~Thread(void)\l\
++ Quit(void): void\l\
++ Join(void): void\l\
+}"
+    ]
+
+      IMutex [
+    label="{\
+IMutex\
+|\
+|\
++ \<\<virtual\>\> ~IMutex()\l\
++ \<\<abstract\>\> Lock(): void\l\
++ \<\<abstract\>\> TryLock(): bool\l\
++ \<\<abstract\>\> UnLock(): void\l\
+}"
+    ]
+
+      Mutex [
+    label="{\
+Mutex\
+|\
+- _mutex: Mutex_t*\l\
+- _locked: bool\l\
+|\
++ Mutex()\l\
++ ~Mutex()\l\
++ Lock(): void\l\
++ TryLock(): bool\l\
++ UnLock(): void\l\
+}"
+    ]
+
+    ScopeLock
+[
+    label="{\
+ScopeLock\
+|\
+- _mutex: IMutex&\l\
+|\
++ ScopeLock(mutex: IMutex&)\l\
++ ~ScopeLock()\l\
+}"
+]
+IMutex -> ScopeLock [arrowhead = diamond]
+
+
+    Mutex -> IMutex
+    Thread -> IThread
+
+}
