@@ -192,7 +192,7 @@ namespace Gmgp
                 ssize_t len = socket->first->GetSocket().Recv(this->_rdBuff, buffSize);
                 if (len <= 0)
                 {
-                    if (socket->second(-1, reinterpret_cast<char*>(0), 0lu))
+                    if (socket->second(-1, reinterpret_cast<char*>(0), size_t(0)))
                         this->_removedTcpSockets.push_front(socket->first);
                     return;
                 }
@@ -206,7 +206,7 @@ namespace Gmgp
             if (FD_ISSET(socket->first->GetSocket().GetSocketFD(), &this->_writeFdset))
             {
                 if (socket->first->SendOnNetwork() < 0)
-                    if (socket->second(-1, reinterpret_cast<char*>(0), 0lu))
+                    if (socket->second(-1, reinterpret_cast<char*>(0), size_t(0)))
                         this->_removedTcpSockets.push_front(socket->first);
             }
         }
