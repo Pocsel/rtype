@@ -16,7 +16,7 @@ namespace Gmgp
             Q_OBJECT
             public:
                 explicit ConnectionWindow(Terminal& term);
-                ~ConnectionWindow();
+                virtual ~ConnectionWindow();
                 void EnableConnection(bool enable);
                 String GetNickname() const;
             private slots:

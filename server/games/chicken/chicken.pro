@@ -103,7 +103,7 @@ HEADERS += Game.hpp \
            Entity.hpp \
            ChickenEntity.hpp \
            TextEntity.hpp \
-           BackGroundEntity.hpp \
+           BackgroundEntity.hpp \
            PlayerEntity.hpp \
            ChickenGeneratorEntity.hpp \
            ScoreBoardEntity.hpp \
@@ -115,7 +115,7 @@ SOURCES += GetGameInstance.cpp \
            Entity.cpp \
            ChickenEntity.cpp \
            TextEntity.cpp \
-           BackGroundEntity.cpp \
+           BackgroundEntity.cpp \
            PlayerEntity.cpp \
            ChickenGeneratorEntity.cpp \
            ScoreBoardEntity.cpp \

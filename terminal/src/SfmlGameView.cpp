@@ -1,4 +1,11 @@
-#include <QTimer>
+
+extern "C"
+{
+    #include <lua.h>
+    #include <lualib.h>
+    #include <lauxlib.h>
+}
+
 #include <luabind/function.hpp>
 #include "SfmlGameView.hpp"
 #include "Terminal.hpp"

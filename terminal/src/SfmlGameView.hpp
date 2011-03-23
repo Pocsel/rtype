@@ -5,12 +5,7 @@
 #include <QMutex>
 #include <QTimer>
 #include <QThread>
-extern "C"
-{
-    #include <lua.h>
-    #include <lualib.h>
-    #include <lauxlib.h>
-}
+
 #include "IGameView.hpp"
 #include "Packet.hpp"
 #include "SfmlSound.hpp"

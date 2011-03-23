@@ -7,3 +7,5 @@ moc_*
 ui_*
 
 *.swp
+
+build
