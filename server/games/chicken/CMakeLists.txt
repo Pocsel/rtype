@@ -93,10 +93,11 @@ list(APPEND
     chicken_src
     ${chicken_base_src}
     )
-
 add_library(chicken SHARED
     ${chicken_src}
     )
+
+set(LIBRARY_OUTPUT_PATH ..)
 
 target_link_libraries(chicken
     ${CMAKE_THREAD_LIBS_INIT}
