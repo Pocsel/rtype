@@ -54,6 +54,7 @@ SET(SFML_LIBRARY_SEARCH_DIR
     /opt/csw
     /opt
     ${SFMLDIR}/lib/vc2008 #for wxWIN vc2008(9.0)
+    ${SFMLDIR}/lib #for wxWIN vc2008(9.0)
 )
 
 FOREACH(COMPONENT ${SFML_COMPONENTS})

@@ -2,7 +2,6 @@
 # Packages
 find_package(Qt4 COMPONENTS QtCore QtGui QtNetwork REQUIRED)
 find_package(OpenGL REQUIRED)
-find_package(GLEW REQUIRED)
 find_package(SFML REQUIRED Graphics Window System Audio)
 find_package(Luabind REQUIRED)
 find_package(Lua51 REQUIRED)
