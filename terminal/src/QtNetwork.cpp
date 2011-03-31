@@ -155,7 +155,7 @@ namespace Gmgp
                 this->_term.GetGameView()->Stop();
             else
                 this->_term.GetConnectionWindow()->EnableConnection(true);
-            this->_term.InformUser(String("A connection error occurred:<br>") + this->_socket->errorString().toStdString());
+            this->_term.InformUser(String("A connection error occurred:<br>") + String(this->_socket->errorString().toStdString()));
         }
 
     }

@@ -11,6 +11,9 @@ project(Rtype)
 
 if (UNIX)
     set(CMAKE_CXX_CUSTOM_FLAGS "-Wall -Wextra -include stdint.h -include stdlib.h")
+else(UNIX)
+    set(CMAKE_CXX_CUSTOM_FLAGS "/FI\"windows/Types.hpp\" /FI\"stdlib.h\"")
+    set(NETWORK_LIB "ws2_32")
 endif(UNIX)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_CUSTOM_FLAGS}")

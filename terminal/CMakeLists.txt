@@ -5,7 +5,7 @@ find_package(OpenGL REQUIRED)
 find_package(SFML REQUIRED Graphics Window System Audio)
 find_package(Luabind REQUIRED)
 find_package(Lua51 REQUIRED)
-
+find_package(Boost REQUIRED)
 
 # Qt sources
 file(GLOB terminal_qthpp "src/*.hpp")
@@ -18,9 +18,10 @@ file(GLOB terminal_base_src "src/*.[ch]pp")
 include(${QT_USE_FILE})
 include_directories(${CMAKE_CURRENT_BINARY_DIR}
                     ${OPENGL_INCLUDE_DIR}
-                    ${GLEW_INCLUDE_DIR}
+                    ${SFML_INCLUDE_DIR}
                     ${LUABIND_INCLUDE_DIR}
                     ${LUA_INCLUDE_DIR}
+                    ${Boost_INCLUDE_DIR}
                     ../common
                     .)
 
@@ -39,7 +40,7 @@ add_executable(terminal
     ${terminal_src}
     ${terminal_qtres}
 )
-
+ 
 target_link_libraries(terminal
     ${QT_LIBRARIES}
     ${OPENGL_LIBRARIES}
@@ -50,4 +51,5 @@ target_link_libraries(terminal
     ${SFML_AUDIO_LIBRARY}
     ${LUA_LIBRARY}
     ${LUABIND_LIBRARY}
+    ${NETWORK_LIB}
     )

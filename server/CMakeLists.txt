@@ -111,4 +111,5 @@ add_executable(server
 target_link_libraries(server
     ${CMAKE_THREAD_LIBS_INIT}
     ${MOAR_LIB}
+    ${NETWORK_LIB}
     )

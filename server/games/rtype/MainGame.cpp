@@ -31,7 +31,7 @@ namespace Gmgp
                      ite = this->_games.end() ; it != ite ; ++it)
                     (*it)->game->Stop();
             }
-
+            /*
             // erase !!
             {
                 usleep(1000);
@@ -45,6 +45,7 @@ namespace Gmgp
                 }
                 this->_mutex.UnLock();
             }
+            */
         }
 
         void MainGame::GameStop(Game* game)

@@ -201,4 +201,5 @@ set(LIBRARY_OUTPUT_PATH ..)
 target_link_libraries(rtype
     ${CMAKE_THREAD_LIBS_INIT}
     ${MOAR_LIB}
+    ${NETWORK_LIB}
     )
